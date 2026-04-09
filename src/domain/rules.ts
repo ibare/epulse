@@ -290,6 +290,15 @@ export const rules: CausalRule[] = [
     lag: 'short',
     explanation: '미국 금리 인상은 한국 금리 인상 압력으로 파급될 수 있습니다.',
   },
+  {
+    id: 'r31',
+    source: 'kr_inflation',
+    target: 'kr_rate',
+    weight: 0.4,
+    direction: 'positive',
+    lag: 'short',
+    explanation: '한국 물가 상승은 한국 기준금리 인상 압력으로 이어질 수 있습니다.',
+  },
 
   // ──────────────────────────────────────────────
   // 한국 금리(input) 직접 효과

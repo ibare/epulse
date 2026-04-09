@@ -19,6 +19,7 @@ const edgeTypes = { causal: CausalEdge };
 
 export function CausalMap() {
   const result = useSimulationStore((s) => s.result);
+  const pinnedInputs = useSimulationStore((s) => s.pinnedInputs);
   const { activeNodeId, connectedEdgeIds, connectedNodeIds, selectNode, hoverNode } =
     useNodeInteraction();
 
@@ -48,10 +49,11 @@ export function CausalMap() {
           isSelected,
           isConnected,
           isDimmed,
+          isPinned: pinnedInputs.has(v.id),
         },
       };
     });
-  }, [result.nodeStates, activeNodeId, hasActiveNode, connectedNodeIds]);
+  }, [result.nodeStates, activeNodeId, hasActiveNode, connectedNodeIds, pinnedInputs]);
 
   const edges = useMemo<Edge<CausalEdgeData>[]>(() => {
     return rules.map((rule) => {

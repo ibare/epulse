@@ -4,7 +4,9 @@ import type {
   NodeState,
   EdgeState,
   TimelineItem,
+  RealismWarning,
 } from '../types';
+import { checkContradictions } from '../contradictions';
 import { variables, variableMap } from '../nodes';
 import { rules } from '../rules';
 import {
@@ -249,6 +251,43 @@ export function runSimulation(
     edgeStates,
     timeline,
     exceptions,
+    warnings: [],
     summary,
   };
 }
+
+// 고정(pin) 메커니즘 적용 시뮬레이션
+// - 고정 input을 target으로 삼는 규칙 제외 (고정 input은 외부 압력 차단)
+// - 엣지 시각화는 전체 규칙 기준으로 평가
+export function runSimulationWithPins(
+  inputValues: Record<string, number>,
+  pinnedInputs: Set<string>,
+  warnings: RealismWarning[],
+): SimulationResult {
+  const inputDeltas = computeInputDeltas(inputValues);
+
+  // 고정 input을 target으로 삼는 규칙 필터링
+  const activeRules = rules.filter((r) => !pinnedInputs.has(r.target));
+
+  // 전파: 필터링된 규칙으로 실행
+  const allDeltas = propagate(inputDeltas, activeRules, depths);
+
+  const nodeStates = buildNodeStates(inputValues, allDeltas);
+  // 엣지 상태는 전체 규칙으로 평가 (필터링된 규칙이라도 시각적으로 표시)
+  const edgeStates = buildEdgeStates(allDeltas);
+  // 타임라인도 전체 규칙으로 설명 텍스트 생성
+  const timeline = buildTimeline(allDeltas, rules);
+  const exceptions = collectExceptions(allDeltas);
+  const summary = generateSummary(allDeltas, inputDeltas);
+
+  return {
+    nodeStates,
+    edgeStates,
+    timeline,
+    exceptions,
+    warnings,
+    summary,
+  };
+}
+
+export { checkContradictions };

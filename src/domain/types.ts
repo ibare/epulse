@@ -68,6 +68,12 @@ export interface TimelineItem {
   exceptions: string[];
 }
 
+export interface RealismWarning {
+  id: string;
+  severity: 'warning' | 'critical';
+  message: string;
+}
+
 export interface SimulationResult {
   nodeStates: Record<string, NodeState>;
   edgeStates: Record<string, EdgeState>;
@@ -77,5 +83,6 @@ export interface SimulationResult {
     medium: TimelineItem[];
   };
   exceptions: Array<{ ruleId: string; text: string }>;
+  warnings: RealismWarning[];
   summary: string;
 }

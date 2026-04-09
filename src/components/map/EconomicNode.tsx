@@ -19,6 +19,7 @@ export type EconomicNodeData = Record<string, unknown> & {
   isSelected: boolean;
   isConnected: boolean;
   isDimmed: boolean;
+  isPinned: boolean;
 };
 
 type EconomicNodeType = Node<EconomicNodeData, 'economic'>;
@@ -33,6 +34,7 @@ function EconomicNodeComponent({ data }: NodeProps<EconomicNodeType>) {
     layer,
     isSelected,
     isDimmed,
+    isPinned,
   } = data;
 
   const stateColors = useStateColors();
@@ -101,10 +103,13 @@ function EconomicNodeComponent({ data }: NodeProps<EconomicNodeType>) {
         }}
         aria-label={`${label}: ${displayState}`}
       >
-        {/* 상단: 라벨 + 배지 */}
+        {/* 상단: 라벨 + 핀 + 배지 */}
         <div className="mb-1.5 flex items-start justify-between gap-1">
           <span className="text-xs font-semibold leading-tight text-slate-200">
             {label}
+            {isPinned && (
+              <span className="ml-1 text-[9px] text-amber-400/70">●</span>
+            )}
           </span>
           <RegionBadge region={region} size="sm" />
         </div>

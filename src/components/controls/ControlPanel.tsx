@@ -22,7 +22,10 @@ export function ControlPanel() {
   const inputValues = useSimulationStore((s) => s.inputValues);
   const activeScenarioId = useSimulationStore((s) => s.activeScenarioId);
   const nodeStates = useSimulationStore((s) => s.result.nodeStates);
+  const pinnedInputs = useSimulationStore((s) => s.pinnedInputs);
+  const realismWarnings = useSimulationStore((s) => s.realismWarnings);
   const setInputValue = useSimulationStore((s) => s.setInputValue);
+  const unpinInput = useSimulationStore((s) => s.unpinInput);
   const applyScenario = useSimulationStore((s) => s.applyScenario);
   const resetToBaseline = useSimulationStore((s) => s.resetToBaseline);
 
@@ -56,6 +59,29 @@ export function ControlPanel() {
       >
         기준값으로 리셋
       </button>
+
+      {/* 현실성 경고 */}
+      {realismWarnings.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          {realismWarnings.map((w) => (
+            <div
+              key={w.id}
+              className="rounded-md px-2.5 py-2 text-[11px] leading-relaxed"
+              style={{
+                backgroundColor: w.severity === 'critical'
+                  ? 'rgba(239,68,68,0.08)'
+                  : 'rgba(245,158,11,0.08)',
+                borderLeft: `2px solid ${w.severity === 'critical' ? '#ef4444' : '#f59e0b'}`,
+                color: w.severity === 'critical'
+                  ? 'rgba(239,68,68,0.9)'
+                  : 'rgba(245,158,11,0.9)',
+              }}
+            >
+              {w.message}
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* 구분선 */}
       <div className="border-t border-white/[0.06]" />
@@ -97,6 +123,8 @@ export function ControlPanel() {
                   value={inputValues[v.id] ?? v.baseline}
                   baseline={v.baseline}
                   effectiveDelta={nodeStates[v.id]?.delta}
+                  isPinned={pinnedInputs.has(v.id)}
+                  onUnpin={() => unpinInput(v.id)}
                   onChange={(val) => setInputValue(v.id, val)}
                 />
               ))}

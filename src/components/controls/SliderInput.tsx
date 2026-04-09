@@ -10,6 +10,8 @@ interface SliderInputProps {
   value: number;
   baseline: number;
   effectiveDelta?: number;
+  isPinned: boolean;
+  onUnpin: () => void;
   onChange: (value: number) => void;
 }
 
@@ -19,19 +21,20 @@ export function SliderInput({
   value,
   baseline,
   effectiveDelta,
+  isPinned,
+  onUnpin,
   onChange,
 }: SliderInputProps) {
   const stateColors = useStateColors();
   const userDelta = value - baseline;
   const color = regionColors[region];
 
-  // 규칙에 의한 추가 압력
-  const rulePressure = effectiveDelta !== undefined
+  // 고정 상태에서만 규칙 압력 표시 (비고정 슬라이더는 이미 자동 조정됨)
+  const rulePressure = isPinned && effectiveDelta !== undefined
     ? effectiveDelta - userDelta
     : 0;
-  const hasRulePressure = Math.abs(rulePressure) >= 2;
+  const hasRulePressure = isPinned && Math.abs(rulePressure) >= 2;
 
-  // 표시용 delta: 유의미한 규칙 압력이 있으면 effectiveDelta, 없으면 userDelta
   const displayDelta = hasRulePressure ? (effectiveDelta ?? userDelta) : userDelta;
 
   const deltaColorValue =
@@ -46,16 +49,30 @@ export function SliderInput({
     ? stateColors.positive
     : stateColors.negative;
 
-  // 규칙 압력에 의한 가상 위치 (슬라이더 트랙 위의 마커)
+  // 고정 상태에서 규칙 압력에 의한 가상 위치
   const effectivePosition = hasRulePressure
     ? Math.max(0, Math.min(100, value + rulePressure))
     : null;
 
   return (
     <div className="flex flex-col gap-1">
-      {/* 상단: 라벨 + 배지 + 값 + delta + 외부압력 */}
+      {/* 상단: 핀/라벨 + 배지 + 값 + delta + 외부압력 */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5 min-w-0">
+        <div className="flex items-center gap-1 min-w-0">
+          {/* 고정 표시 (클릭으로 해제) */}
+          {isPinned ? (
+            <button
+              type="button"
+              onClick={onUnpin}
+              className="text-[9px] text-amber-400/80 hover:text-amber-300 cursor-pointer shrink-0 w-3 text-center"
+              title="고정 해제 — 다른 변수에 따라 자동 조정됩니다"
+              aria-label={`${label} 고정 해제`}
+            >
+              ●
+            </button>
+          ) : (
+            <span className="w-3 shrink-0" />
+          )}
           <RegionBadge region={region} size="sm" />
           <span className="text-xs text-slate-300 truncate">{label}</span>
         </div>
@@ -73,7 +90,7 @@ export function SliderInput({
             <span
               className="text-[9px] font-mono"
               style={{ color: pressureGlowColor }}
-              title={`외부 압력 ${rulePressure > 0 ? '+' : ''}${Math.round(rulePressure)}`}
+              title={`무시 중인 압력 ${rulePressure > 0 ? '+' : ''}${Math.round(rulePressure)}`}
             >
               {rulePressure > 0 ? '▲' : '▼'}
             </span>
@@ -105,7 +122,7 @@ export function SliderInput({
           }}
         />
 
-        {/* 규칙 압력 마커 — 슬라이더 트랙 위에 표시 */}
+        {/* 고정 상태에서 무시 중인 규칙 압력 위치 마커 */}
         {effectivePosition !== null && (
           <div
             className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full z-0 transition-all duration-300"
