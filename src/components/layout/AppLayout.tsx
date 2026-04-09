@@ -22,8 +22,10 @@ export function AppLayout({ left, center, right }: AppLayoutProps) {
       />
       <div className="relative flex min-h-0 flex-1">
         {/* 좌측 조작 패널 - 데스크톱 */}
-        <aside className="hidden w-[270px] shrink-0 overflow-y-auto border-r border-slate-800/50 p-3 lg:block">
-          {left}
+        <aside className="relative hidden w-[270px] shrink-0 border-r border-slate-800/50 lg:block">
+          <div className="h-full overflow-y-auto p-3">
+            {left}
+          </div>
         </aside>
 
         {/* 좌측 조작 패널 - 모바일 오버레이 */}

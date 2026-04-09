@@ -1,7 +1,8 @@
-import type { Region } from '../../domain/types';
-import { RegionBadge } from '../ui/RegionBadge';
+import { useRef } from 'react';
+import type { Region, RealismWarning } from '../../domain/types';
 import { regionColors } from '../../styles/tokens';
 import { useStateColors } from '../../hooks/useStateColors';
+import { WarningBubble } from './WarningBubble';
 
 interface SliderInputProps {
   variableId: string;
@@ -13,6 +14,7 @@ interface SliderInputProps {
   isPinned: boolean;
   onUnpin: () => void;
   onChange: (value: number) => void;
+  warnings?: RealismWarning[];
 }
 
 export function SliderInput({
@@ -24,7 +26,9 @@ export function SliderInput({
   isPinned,
   onUnpin,
   onChange,
+  warnings,
 }: SliderInputProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const stateColors = useStateColors();
   const userDelta = value - baseline;
   const color = regionColors[region];
@@ -54,9 +58,11 @@ export function SliderInput({
     ? Math.max(0, Math.min(100, value + rulePressure))
     : null;
 
+  const hasWarnings = warnings && warnings.length > 0;
+
   return (
     <div className="flex flex-col gap-1">
-      {/* 상단: 핀/라벨 + 배지 + 값 + delta + 외부압력 */}
+      {/* 상단: 핀/라벨 + 값 + delta + 외부압력 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1 min-w-0">
           {/* 고정 표시 (클릭으로 해제) */}
@@ -73,7 +79,6 @@ export function SliderInput({
           ) : (
             <span className="w-3 shrink-0" />
           )}
-          <RegionBadge region={region} size="sm" />
           <span className="text-xs text-slate-300 truncate">{label}</span>
         </div>
         <div className="flex items-center gap-1 shrink-0">
@@ -99,7 +104,10 @@ export function SliderInput({
       </div>
 
       {/* 슬라이더 */}
-      <div className="relative">
+      <div ref={containerRef} className="relative">
+        {hasWarnings && (
+          <WarningBubble warnings={warnings} anchorRef={containerRef} />
+        )}
         <input
           type="range"
           min={0}

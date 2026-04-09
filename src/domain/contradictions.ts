@@ -75,6 +75,7 @@ export function checkContradictions(
       id: rule.id,
       severity: rule.severity,
       message: rule.message,
+      variables: rule.variables,
     });
   }
 

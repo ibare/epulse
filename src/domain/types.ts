@@ -72,6 +72,7 @@ export interface RealismWarning {
   id: string;
   severity: 'warning' | 'critical';
   message: string;
+  variables: [string, string];
 }
 
 export interface SimulationResult {
