@@ -72,6 +72,7 @@ export function CausalMap() {
           explanation: rule.explanation,
           isDimmed,
           lag: rule.lag,
+          order: edgeState?.order ?? 0,
         },
       };
     });

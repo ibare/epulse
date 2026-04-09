@@ -56,6 +56,7 @@ export interface EdgeState {
   active: boolean;
   strength: number; // 0~1
   direction: Direction;
+  order: number; // 전파 순서 (1부터, 0=비활성)
 }
 
 export interface TimelineItem {

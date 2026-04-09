@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import {
   BaseEdge,
+  EdgeLabelRenderer,
   getBezierPath,
   type EdgeProps,
   type Edge,
@@ -15,6 +16,7 @@ export type CausalEdgeData = Record<string, unknown> & {
   explanation: string;
   isDimmed: boolean;
   lag: 'immediate' | 'short' | 'medium';
+  order: number;
 };
 
 type CausalEdgeType = Edge<CausalEdgeData, 'causal'>;
@@ -34,9 +36,10 @@ function CausalEdgeComponent({
     strength = 0,
     direction = 'positive',
     isDimmed = false,
+    order = 0,
   } = data ?? {};
 
-  const [edgePath] = getBezierPath({
+  const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
     sourceY,
     targetX,
@@ -55,6 +58,7 @@ function CausalEdgeComponent({
   const opacity = isDimmed ? 0.06 : active ? 0.8 : 0.15;
 
   return (
+    <>
     <g className="transition-opacity duration-300" style={{ opacity }}>
       <BaseEdge
         path={edgePath}
@@ -90,6 +94,32 @@ function CausalEdgeComponent({
         />
       )}
     </g>
+    {active && !isDimmed && order > 0 && (
+      <EdgeLabelRenderer>
+        <div
+          className="nodrag nopan"
+          style={{
+            position: 'absolute',
+            transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+            pointerEvents: 'none',
+            width: 18,
+            height: 18,
+            borderRadius: '50%',
+            backgroundColor: `${color}cc`,
+            border: `1px solid ${color}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 10,
+            fontWeight: 700,
+            color: '#fff',
+          }}
+        >
+          {order}
+        </div>
+      </EdgeLabelRenderer>
+    )}
+  </>
   );
 }
 

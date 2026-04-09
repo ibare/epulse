@@ -23,13 +23,13 @@ const inputVariables: EconomicVariable[] = [
 // 파생 변수 11개
 const derivedVariables: EconomicVariable[] = [
   // 한국 - 매개 레이어
-  { id: 'kr_rate_pressure', label: '한국 금리 압력', region: 'KR', type: 'derived', layer: 'transmission', baseline: 0 },
+  { id: 'kr_rate_pressure', label: '시장금리', region: 'KR', type: 'derived', layer: 'transmission', baseline: 0 },
 
   // 글로벌 - 매개 레이어
-  { id: 'usd_strength', label: '달러 강세 압력', region: 'GL', type: 'derived', layer: 'transmission', baseline: 0 },
+  { id: 'usd_strength', label: '달러 강세 지수', region: 'GL', type: 'derived', layer: 'transmission', baseline: 0 },
 
   // 한국 - 매개 레이어
-  { id: 'usdkrw_pressure', label: '원/달러 환율 압력', region: 'KR', type: 'derived', layer: 'transmission', baseline: 0 },
+  { id: 'usdkrw_pressure', label: '시장환율 기대', region: 'KR', type: 'derived', layer: 'transmission', baseline: 0 },
 
   // 한국 - 시장 레이어
   { id: 'kr_bond', label: '한국 채권 가격 압력', region: 'KR', type: 'derived', layer: 'market', baseline: 0 },

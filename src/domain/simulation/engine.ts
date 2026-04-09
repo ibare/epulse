@@ -67,6 +67,7 @@ function buildNodeStates(
 
 function buildEdgeStates(
   allDeltas: Record<string, number>,
+  propagationDepths: Record<string, number>,
 ): Record<string, EdgeState> {
   const states: Record<string, EdgeState> = {};
 
@@ -83,6 +84,7 @@ function buildEdgeStates(
       active,
       strength: intensityToStrength(deltaToIntensity(sourceDelta)),
       direction: effectiveDirection,
+      order: active ? (propagationDepths[rule.source] ?? 0) + 1 : 0,
     };
   }
 
@@ -241,7 +243,7 @@ export function runSimulation(
   const allDeltas = propagate(inputDeltas, rules, depths);
 
   const nodeStates = buildNodeStates(inputValues, allDeltas);
-  const edgeStates = buildEdgeStates(allDeltas);
+  const edgeStates = buildEdgeStates(allDeltas, depths);
   const timeline = buildTimeline(allDeltas, rules);
   const exceptions = collectExceptions(allDeltas);
   const summary = generateSummary(allDeltas, inputDeltas);
@@ -274,7 +276,7 @@ export function runSimulationWithPins(
 
   const nodeStates = buildNodeStates(inputValues, allDeltas);
   // 엣지 상태는 전체 규칙으로 평가 (필터링된 규칙이라도 시각적으로 표시)
-  const edgeStates = buildEdgeStates(allDeltas);
+  const edgeStates = buildEdgeStates(allDeltas, depths);
   // 타임라인도 전체 규칙으로 설명 텍스트 생성
   const timeline = buildTimeline(allDeltas, rules);
   const exceptions = collectExceptions(allDeltas);
