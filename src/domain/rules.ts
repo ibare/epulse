@@ -365,6 +365,28 @@ export const rules: CausalRule[] = [
     lag: 'short',
     explanation: '미국 금리 인상은 밸류에이션 부담으로 주식시장에 압력을 줄 수 있습니다.',
   },
+
+  // ──────────────────────────────────────────────
+  // 금리 → 물가 (긴축/완화 효과)
+  // ──────────────────────────────────────────────
+  {
+    id: 'r39',
+    source: 'kr_rate',
+    target: 'kr_inflation',
+    weight: 0.3,
+    direction: 'negative',
+    lag: 'medium',
+    explanation: '한국 기준금리 인상은 수요 억제를 통해 물가 하락 압력을 줄 수 있습니다.',
+  },
+  {
+    id: 'r40',
+    source: 'us_rate',
+    target: 'us_inflation',
+    weight: 0.3,
+    direction: 'negative',
+    lag: 'medium',
+    explanation: '미국 금리 인상은 수요 억제를 통해 물가 하락 압력을 줄 수 있습니다.',
+  },
 ];
 
 export const ruleMap: Record<string, CausalRule> = Object.fromEntries(

@@ -59,6 +59,8 @@ export function CausalMap() {
     return rules.map((rule) => {
       const edgeState = result.edgeStates[rule.id];
       const isDimmed = hasActiveNode && !connectedEdgeIds.has(rule.id);
+      const active = edgeState?.active ?? false;
+      const direction = edgeState?.direction ?? rule.direction;
 
       return {
         id: rule.id,
@@ -66,9 +68,9 @@ export function CausalMap() {
         target: rule.target,
         type: 'causal' as const,
         data: {
-          active: edgeState?.active ?? false,
+          active,
           strength: edgeState?.strength ?? 0,
-          direction: edgeState?.direction ?? rule.direction,
+          direction,
           explanation: rule.explanation,
           isDimmed,
           lag: rule.lag,
