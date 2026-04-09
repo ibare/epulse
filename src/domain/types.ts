@@ -1,4 +1,4 @@
-export type Region = 'KR' | 'US' | 'EU' | 'GL';
+export type Region = 'KR' | 'US' | 'GL';
 export type VariableType = 'input' | 'derived';
 export type Layer = 'cause' | 'transmission' | 'market';
 export type Lag = 'immediate' | 'short' | 'medium';

@@ -29,7 +29,7 @@ export const scenarios: Scenario[] = [
     id: 'slowdown',
     label: '경기 둔화 우려',
     description: '글로벌 경기 둔화 시나리오',
-    changes: { kr_growth: 25, us_growth: 30, eu_growth: 28, risk: 65 },
+    changes: { kr_growth: 25, us_growth: 30, risk: 65 },
   },
   {
     id: 'export_boom',

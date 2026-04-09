@@ -10,7 +10,6 @@ import type { Region } from '../../domain/types';
 const groups: { region: Region; label: string; ids: string[] }[] = [
   { region: 'KR', label: '한국', ids: ['kr_growth', 'kr_inflation', 'kr_rate', 'usdkrw'] },
   { region: 'US', label: '미국', ids: ['us_growth', 'us_inflation', 'us_rate'] },
-  { region: 'EU', label: 'EU', ids: ['eu_growth', 'eu_inflation', 'eu_rate'] },
   { region: 'GL', label: '글로벌', ids: ['oil', 'risk'] },
 ];
 

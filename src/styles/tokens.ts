@@ -18,12 +18,6 @@ export const regionColors: Record<Region, {
     border: 'rgba(59,130,246,0.3)',
     label: 'US',
   },
-  EU: {
-    primary: '#a855f7',
-    bg: 'rgba(168,85,247,0.1)',
-    border: 'rgba(168,85,247,0.3)',
-    label: 'EU',
-  },
   GL: {
     primary: '#f59e0b',
     bg: 'rgba(245,158,11,0.1)',

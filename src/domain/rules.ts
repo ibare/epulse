@@ -22,15 +22,6 @@ export const rules: CausalRule[] = [
     lag: 'immediate',
     explanation: '미국 물가 상승은 연준의 금리 인상 기대를 높일 수 있습니다.',
   },
-  {
-    id: 'r03',
-    source: 'eu_inflation',
-    target: 'eu_rate',
-    weight: 0.5,
-    direction: 'positive',
-    lag: 'immediate',
-    explanation: 'EU 물가 상승은 ECB의 금리 인상 기대를 높일 수 있습니다.',
-  },
 
   // ──────────────────────────────────────────────
   // 성장률 → 금리/주식
@@ -67,15 +58,6 @@ export const rules: CausalRule[] = [
     direction: 'positive',
     lag: 'short',
     explanation: '미국 성장률 상승은 미국 주식시장에 긍정적 영향을 줄 수 있습니다.',
-  },
-  {
-    id: 'r07',
-    source: 'eu_growth',
-    target: 'eu_stock',
-    weight: 0.5,
-    direction: 'positive',
-    lag: 'short',
-    explanation: 'EU 성장률 상승은 EU 주식시장에 긍정적 영향을 줄 수 있습니다.',
   },
 
   // ──────────────────────────────────────────────
@@ -122,15 +104,6 @@ export const rules: CausalRule[] = [
     direction: 'negative',
     lag: 'immediate',
     explanation: '미국 금리 인상은 미국 채권 가격 하락 압력으로 이어집니다.',
-  },
-  {
-    id: 'r12',
-    source: 'eu_rate',
-    target: 'eu_bond',
-    weight: 0.8,
-    direction: 'negative',
-    lag: 'immediate',
-    explanation: 'EU 금리 인상은 EU 채권 가격 하락 압력으로 이어집니다.',
   },
 
   // ──────────────────────────────────────────────
@@ -225,15 +198,6 @@ export const rules: CausalRule[] = [
     explanation: '유가 상승은 미국 물가 상승 압력을 높일 수 있습니다.',
   },
   {
-    id: 'r24',
-    source: 'oil',
-    target: 'eu_inflation',
-    weight: 0.3,
-    direction: 'positive',
-    lag: 'short',
-    explanation: '유가 상승은 EU 물가 상승 압력을 높일 수 있습니다.',
-  },
-  {
     id: 'r25',
     source: 'oil',
     target: 'kr_stock',
@@ -300,15 +264,6 @@ export const rules: CausalRule[] = [
     lag: 'immediate',
     explanation: '위험회피 심리 확산은 미국 주식시장에도 부담을 줍니다.',
   },
-  {
-    id: 'r29',
-    source: 'risk',
-    target: 'eu_stock',
-    weight: 0.2,
-    direction: 'negative',
-    lag: 'immediate',
-    explanation: '위험회피 심리 확산은 EU 주식시장에도 부담을 줍니다.',
-  },
 
   // ──────────────────────────────────────────────
   // 외국인 자금 → 주식
@@ -334,15 +289,6 @@ export const rules: CausalRule[] = [
     direction: 'positive',
     lag: 'short',
     explanation: '미국 금리 인상은 한국 금리 인상 압력으로 파급될 수 있습니다.',
-  },
-  {
-    id: 'r31',
-    source: 'us_rate',
-    target: 'eu_rate',
-    weight: 0.2,
-    direction: 'positive',
-    lag: 'short',
-    explanation: '미국 금리 인상은 EU 금리 정책에도 영향을 줄 수 있습니다.',
   },
 
   // ──────────────────────────────────────────────
@@ -396,19 +342,6 @@ export const rules: CausalRule[] = [
     direction: 'negative',
     lag: 'short',
     explanation: '한국 경제 성장은 원화 강세(환율 하락) 압력을 줄 수 있습니다.',
-  },
-
-  // ──────────────────────────────────────────────
-  // EU 금리 직접 효과
-  // ──────────────────────────────────────────────
-  {
-    id: 'r37',
-    source: 'eu_rate',
-    target: 'eu_stock',
-    weight: 0.25,
-    direction: 'negative',
-    lag: 'short',
-    explanation: 'EU 금리 상승은 EU 주식시장에 부담이 될 수 있습니다.',
   },
 
   // ──────────────────────────────────────────────

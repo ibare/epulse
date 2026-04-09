@@ -15,11 +15,6 @@ const inputVariables: EconomicVariable[] = [
   { id: 'us_inflation', label: '물가', region: 'US', type: 'input', layer: 'cause', baseline: 50 },
   { id: 'us_growth', label: '성장률', region: 'US', type: 'input', layer: 'cause', baseline: 50 },
 
-  // EU
-  { id: 'eu_rate', label: '기준금리', region: 'EU', type: 'input', layer: 'transmission', baseline: 50 },
-  { id: 'eu_inflation', label: '물가', region: 'EU', type: 'input', layer: 'cause', baseline: 50 },
-  { id: 'eu_growth', label: '성장률', region: 'EU', type: 'input', layer: 'cause', baseline: 50 },
-
   // 글로벌
   { id: 'oil', label: '유가', region: 'GL', type: 'input', layer: 'cause', baseline: 50 },
   { id: 'risk', label: '위험회피 심리', region: 'GL', type: 'input', layer: 'cause', baseline: 30 },
@@ -46,9 +41,6 @@ const derivedVariables: EconomicVariable[] = [
   { id: 'us_bond', label: '미국 채권 압력', region: 'US', type: 'derived', layer: 'market', baseline: 0 },
   { id: 'us_stock', label: '미국 주식 압력', region: 'US', type: 'derived', layer: 'market', baseline: 0 },
 
-  // EU - 시장 레이어
-  { id: 'eu_bond', label: 'EU 채권 압력', region: 'EU', type: 'derived', layer: 'market', baseline: 0 },
-  { id: 'eu_stock', label: 'EU 주식 압력', region: 'EU', type: 'derived', layer: 'market', baseline: 0 },
 ];
 
 export const variables: EconomicVariable[] = [
@@ -62,7 +54,7 @@ export const variableMap: Record<string, EconomicVariable> = Object.fromEntries(
 
 // React Flow 노드 위치 좌표
 // 3열 배치: 원인(x=0) → 매개(x=350) → 시장(x=700)
-// 국가별 그룹핑: KR 상단, US 중간, EU 하단, GL 최하단
+// 국가별 그룹핑: KR 상단, US 중간, GL 하단
 export const nodePositions: Record<string, { x: number; y: number }> = {
   // 원인 레이어 (x=0) — KR
   kr_growth:     { x: 0, y: 0 },
@@ -72,13 +64,9 @@ export const nodePositions: Record<string, { x: number; y: number }> = {
   us_inflation:  { x: 0, y: 240 },
   us_growth:     { x: 0, y: 340 },
 
-  // 원인 레이어 — EU
-  eu_inflation:  { x: 0, y: 480 },
-  eu_growth:     { x: 0, y: 580 },
-
   // 원인 레이어 — GL
-  oil:           { x: 0, y: 720 },
-  risk:          { x: 0, y: 820 },
+  oil:           { x: 0, y: 480 },
+  risk:          { x: 0, y: 580 },
 
   // 매개 레이어 (x=350) — KR
   kr_rate:           { x: 350, y: 0 },
@@ -89,11 +77,8 @@ export const nodePositions: Record<string, { x: number; y: number }> = {
   // 매개 레이어 — US
   us_rate:       { x: 350, y: 440 },
 
-  // 매개 레이어 — EU
-  eu_rate:       { x: 350, y: 580 },
-
   // 매개 레이어 — GL
-  usd_strength:  { x: 350, y: 720 },
+  usd_strength:  { x: 350, y: 480 },
 
   // 시장 레이어 (x=700) — KR
   kr_bond:       { x: 700, y: 0 },
@@ -105,7 +90,4 @@ export const nodePositions: Record<string, { x: number; y: number }> = {
   us_bond:       { x: 700, y: 440 },
   us_stock:      { x: 700, y: 540 },
 
-  // 시장 레이어 — EU
-  eu_bond:       { x: 700, y: 680 },
-  eu_stock:      { x: 700, y: 780 },
 };
