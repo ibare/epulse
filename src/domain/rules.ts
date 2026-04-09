@@ -1,7 +1,9 @@
 import type { CausalRule } from './types';
 
 export const rules: CausalRule[] = [
+  // ──────────────────────────────────────────────
   // 물가 → 금리
+  // ──────────────────────────────────────────────
   {
     id: 'r01',
     source: 'kr_inflation',
@@ -19,7 +21,6 @@ export const rules: CausalRule[] = [
     direction: 'positive',
     lag: 'immediate',
     explanation: '미국 물가 상승은 연준의 금리 인상 기대를 높일 수 있습니다.',
-    // 표시 전용: us_rate는 input이므로 엔진에서 값 변경 없음
   },
   {
     id: 'r03',
@@ -29,10 +30,11 @@ export const rules: CausalRule[] = [
     direction: 'positive',
     lag: 'immediate',
     explanation: 'EU 물가 상승은 ECB의 금리 인상 기대를 높일 수 있습니다.',
-    // 표시 전용: eu_rate는 input이므로 엔진에서 값 변경 없음
   },
 
+  // ──────────────────────────────────────────────
   // 성장률 → 금리/주식
+  // ──────────────────────────────────────────────
   {
     id: 'r04',
     source: 'kr_growth',
@@ -76,7 +78,9 @@ export const rules: CausalRule[] = [
     explanation: 'EU 성장률 상승은 EU 주식시장에 긍정적 영향을 줄 수 있습니다.',
   },
 
+  // ──────────────────────────────────────────────
   // 금리 → 채권/주식/환율
+  // ──────────────────────────────────────────────
   {
     id: 'r08',
     source: 'kr_rate_pressure',
@@ -129,7 +133,9 @@ export const rules: CausalRule[] = [
     explanation: 'EU 금리 인상은 EU 채권 가격 하락 압력으로 이어집니다.',
   },
 
+  // ──────────────────────────────────────────────
   // 달러/환율 → 한국 시장
+  // ──────────────────────────────────────────────
   {
     id: 'r13',
     source: 'usd_strength',
@@ -182,7 +188,9 @@ export const rules: CausalRule[] = [
     explanation: '원화 약세는 수입 원자재 비용 부담을 증가시킵니다.',
   },
 
-  // 유가/리스크 → 시장
+  // ──────────────────────────────────────────────
+  // 유가 → 전방위 영향
+  // ──────────────────────────────────────────────
   {
     id: 'r18',
     source: 'oil',
@@ -191,7 +199,6 @@ export const rules: CausalRule[] = [
     direction: 'positive',
     lag: 'short',
     explanation: '유가 상승은 한국 물가 상승 압력을 높일 수 있습니다.',
-    // 표시 전용: kr_inflation은 input이므로 엔진에서 값 변경 없음
   },
   {
     id: 'r19',
@@ -208,6 +215,55 @@ export const rules: CausalRule[] = [
       },
     ],
   },
+  {
+    id: 'r23',
+    source: 'oil',
+    target: 'us_inflation',
+    weight: 0.3,
+    direction: 'positive',
+    lag: 'short',
+    explanation: '유가 상승은 미국 물가 상승 압력을 높일 수 있습니다.',
+  },
+  {
+    id: 'r24',
+    source: 'oil',
+    target: 'eu_inflation',
+    weight: 0.3,
+    direction: 'positive',
+    lag: 'short',
+    explanation: '유가 상승은 EU 물가 상승 압력을 높일 수 있습니다.',
+  },
+  {
+    id: 'r25',
+    source: 'oil',
+    target: 'kr_stock',
+    weight: 0.2,
+    direction: 'negative',
+    lag: 'short',
+    explanation: '유가 상승은 에너지 수입 비용 증가로 한국 주식시장에 부담이 될 수 있습니다.',
+  },
+  {
+    id: 'r26',
+    source: 'oil',
+    target: 'us_stock',
+    weight: 0.15,
+    direction: 'negative',
+    lag: 'short',
+    explanation: '유가 상승은 기업 비용 부담을 높여 미국 주식시장에 압력을 줄 수 있습니다.',
+  },
+  {
+    id: 'r27',
+    source: 'oil',
+    target: 'risk',
+    weight: 0.2,
+    direction: 'positive',
+    lag: 'medium',
+    explanation: '유가 급등은 경제 불확실성을 높여 위험회피 심리를 자극할 수 있습니다.',
+  },
+
+  // ──────────────────────────────────────────────
+  // 위험회피 심리 → 글로벌 시장
+  // ──────────────────────────────────────────────
   {
     id: 'r20',
     source: 'risk',
@@ -236,6 +292,28 @@ export const rules: CausalRule[] = [
     ],
   },
   {
+    id: 'r28',
+    source: 'risk',
+    target: 'us_stock',
+    weight: 0.25,
+    direction: 'negative',
+    lag: 'immediate',
+    explanation: '위험회피 심리 확산은 미국 주식시장에도 부담을 줍니다.',
+  },
+  {
+    id: 'r29',
+    source: 'risk',
+    target: 'eu_stock',
+    weight: 0.2,
+    direction: 'negative',
+    lag: 'immediate',
+    explanation: '위험회피 심리 확산은 EU 주식시장에도 부담을 줍니다.',
+  },
+
+  // ──────────────────────────────────────────────
+  // 외국인 자금 → 주식
+  // ──────────────────────────────────────────────
+  {
     id: 'r22',
     source: 'foreign_flow',
     target: 'kr_stock',
@@ -243,6 +321,107 @@ export const rules: CausalRule[] = [
     direction: 'positive',
     lag: 'short',
     explanation: '외국인 자금 유입은 한국 주식시장에 긍정적 영향을 줍니다.',
+  },
+
+  // ──────────────────────────────────────────────
+  // 금리 크로스 — input 간 전파
+  // ──────────────────────────────────────────────
+  {
+    id: 'r30',
+    source: 'us_rate',
+    target: 'kr_rate',
+    weight: 0.3,
+    direction: 'positive',
+    lag: 'short',
+    explanation: '미국 금리 인상은 한국 금리 인상 압력으로 파급될 수 있습니다.',
+  },
+  {
+    id: 'r31',
+    source: 'us_rate',
+    target: 'eu_rate',
+    weight: 0.2,
+    direction: 'positive',
+    lag: 'short',
+    explanation: '미국 금리 인상은 EU 금리 정책에도 영향을 줄 수 있습니다.',
+  },
+
+  // ──────────────────────────────────────────────
+  // 한국 금리(input) 직접 효과
+  // ──────────────────────────────────────────────
+  {
+    id: 'r32',
+    source: 'kr_rate',
+    target: 'kr_bond',
+    weight: 0.5,
+    direction: 'negative',
+    lag: 'immediate',
+    explanation: '한국 금리 상승은 채권 가격 하락 압력으로 이어집니다.',
+  },
+  {
+    id: 'r33',
+    source: 'kr_rate',
+    target: 'kr_stock',
+    weight: 0.2,
+    direction: 'negative',
+    lag: 'short',
+    explanation: '한국 금리 상승은 기업 자금 조달 비용을 높여 주식시장에 부담이 될 수 있습니다.',
+  },
+  {
+    id: 'r34',
+    source: 'kr_rate',
+    target: 'usdkrw',
+    weight: 0.25,
+    direction: 'negative',
+    lag: 'short',
+    explanation: '한국 금리 인상은 원화 강세(환율 하락) 압력을 줄 수 있습니다.',
+  },
+
+  // ──────────────────────────────────────────────
+  // 성장률 크로스
+  // ──────────────────────────────────────────────
+  {
+    id: 'r35',
+    source: 'us_growth',
+    target: 'kr_stock',
+    weight: 0.2,
+    direction: 'positive',
+    lag: 'short',
+    explanation: '미국 경제 성장은 한국 수출 기업에 긍정적 영향을 줄 수 있습니다.',
+  },
+  {
+    id: 'r36',
+    source: 'kr_growth',
+    target: 'usdkrw',
+    weight: 0.2,
+    direction: 'negative',
+    lag: 'short',
+    explanation: '한국 경제 성장은 원화 강세(환율 하락) 압력을 줄 수 있습니다.',
+  },
+
+  // ──────────────────────────────────────────────
+  // EU 금리 직접 효과
+  // ──────────────────────────────────────────────
+  {
+    id: 'r37',
+    source: 'eu_rate',
+    target: 'eu_stock',
+    weight: 0.25,
+    direction: 'negative',
+    lag: 'short',
+    explanation: 'EU 금리 상승은 EU 주식시장에 부담이 될 수 있습니다.',
+  },
+
+  // ──────────────────────────────────────────────
+  // 미국 금리 → 주식
+  // ──────────────────────────────────────────────
+  {
+    id: 'r38',
+    source: 'us_rate',
+    target: 'us_stock',
+    weight: 0.3,
+    direction: 'negative',
+    lag: 'short',
+    explanation: '미국 금리 인상은 밸류에이션 부담으로 주식시장에 압력을 줄 수 있습니다.',
   },
 ];
 

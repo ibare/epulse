@@ -5,7 +5,7 @@ import {
   type EdgeProps,
   type Edge,
 } from '@xyflow/react';
-import { stateColors } from '../../styles/tokens';
+import { useStateColors } from '../../hooks/useStateColors';
 import type { Direction } from '../../domain/types';
 
 export type CausalEdgeData = Record<string, unknown> & {
@@ -28,6 +28,7 @@ function CausalEdgeComponent({
   targetPosition,
   data,
 }: EdgeProps<CausalEdgeType>) {
+  const stateColors = useStateColors();
   const {
     active = false,
     strength = 0,

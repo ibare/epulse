@@ -1,10 +1,11 @@
-import { stateColors } from '../../styles/tokens';
+import { useStateColors } from '../../hooks/useStateColors';
 
 interface IntensityDotsProps {
   intensity: number; // -3 ~ +3
 }
 
 export function IntensityDots({ intensity }: IntensityDotsProps) {
+  const stateColors = useStateColors();
   const absIntensity = Math.abs(intensity);
   const color = intensity > 0
     ? stateColors.positive

@@ -3,7 +3,8 @@ import { Handle, Position } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
 import { RegionBadge } from '../ui/RegionBadge';
 import { IntensityDots } from '../ui/IntensityDots';
-import { regionColors, stateColors } from '../../styles/tokens';
+import { regionColors } from '../../styles/tokens';
+import { useStateColors } from '../../hooks/useStateColors';
 import { deltaToArrow } from '../../utils/formatters';
 import type { Region } from '../../domain/types';
 
@@ -34,6 +35,7 @@ function EconomicNodeComponent({ data }: NodeProps<EconomicNodeType>) {
     isDimmed,
   } = data;
 
+  const stateColors = useStateColors();
   const regionColor = regionColors[region];
   const absIntensity = Math.abs(intensity);
 

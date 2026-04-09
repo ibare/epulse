@@ -22,6 +22,7 @@ const inputVariableIds = new Set(
 export function ControlPanel() {
   const inputValues = useSimulationStore((s) => s.inputValues);
   const activeScenarioId = useSimulationStore((s) => s.activeScenarioId);
+  const nodeStates = useSimulationStore((s) => s.result.nodeStates);
   const setInputValue = useSimulationStore((s) => s.setInputValue);
   const applyScenario = useSimulationStore((s) => s.applyScenario);
   const resetToBaseline = useSimulationStore((s) => s.resetToBaseline);
@@ -96,6 +97,7 @@ export function ControlPanel() {
                   region={v.region}
                   value={inputValues[v.id] ?? v.baseline}
                   baseline={v.baseline}
+                  effectiveDelta={nodeStates[v.id]?.delta}
                   onChange={(val) => setInputValue(v.id, val)}
                 />
               ))}

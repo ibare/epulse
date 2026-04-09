@@ -2,6 +2,7 @@
 
 import type { TimelineItem } from '../../domain/types';
 import { useSimulationStore } from '../../store/simulationStore';
+import { useStateColors } from '../../hooks/useStateColors';
 import { RegionBadge } from '../ui/RegionBadge';
 import { IntensityDots } from '../ui/IntensityDots';
 import { deltaToArrow } from '../../utils/formatters';
@@ -17,11 +18,12 @@ const SECTIONS = [
 
 /** 개별 타임라인 항목 렌더링 */
 function TimelineEntry({ item }: { item: TimelineItem }) {
-  const deltaColor = item.delta > 0
-    ? 'text-emerald-400'
+  const stateColors = useStateColors();
+  const deltaColorValue = item.delta > 0
+    ? stateColors.positive
     : item.delta < 0
-      ? 'text-rose-400'
-      : 'text-slate-400';
+      ? stateColors.negative
+      : stateColors.neutral;
 
   return (
     <div className="space-y-1.5 py-2">
@@ -36,7 +38,10 @@ function TimelineEntry({ item }: { item: TimelineItem }) {
       {/* 상태 + 방향 화살표 + 강도 */}
       <div className="flex items-center gap-2">
         <span className="text-xs text-slate-300">{item.displayState}</span>
-        <span className={`text-xs font-semibold ${deltaColor}`}>
+        <span
+          className="text-xs font-semibold"
+          style={{ color: deltaColorValue }}
+        >
           {deltaToArrow(item.delta)}
         </span>
         <IntensityDots intensity={item.delta > 0 ? Math.min(Math.ceil(Math.abs(item.delta) / 5), 3) : item.delta < 0 ? -Math.min(Math.ceil(Math.abs(item.delta) / 5), 3) : 0} />

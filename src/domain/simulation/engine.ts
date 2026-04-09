@@ -18,8 +18,9 @@ import {
   intensityToStrength,
 } from './stateMapper';
 
-// 전파 깊이를 앱 초기화 시 캐싱
-const depths = computePropagationDepths(rules);
+// 모든 변수 ID를 수집하여 깊이 계산
+const allVarIds = new Set(variables.map((v) => v.id));
+const depths = computePropagationDepths(rules, allVarIds);
 
 const inputIds = new Set(
   variables.filter((v) => v.type === 'input').map((v) => v.id),
@@ -39,32 +40,24 @@ function computeInputDeltas(
 
 function buildNodeStates(
   inputValues: Record<string, number>,
-  inputDeltas: Record<string, number>,
-  derivedDeltas: Record<string, number>,
+  allDeltas: Record<string, number>,
 ): Record<string, NodeState> {
   const states: Record<string, NodeState> = {};
 
   for (const v of variables) {
-    if (v.type === 'input') {
-      const value = inputValues[v.id] ?? v.baseline;
-      const delta = inputDeltas[v.id] ?? 0;
-      states[v.id] = {
-        variableId: v.id,
-        value,
-        delta,
-        displayState: deltaToDisplayState(delta),
-        intensity: deltaToIntensity(delta),
-      };
-    } else {
-      const delta = derivedDeltas[v.id] ?? 0;
-      states[v.id] = {
-        variableId: v.id,
-        value: v.baseline + delta,
-        delta,
-        displayState: deltaToDisplayState(delta),
-        intensity: deltaToIntensity(delta),
-      };
-    }
+    const delta = allDeltas[v.id] ?? 0;
+
+    states[v.id] = {
+      variableId: v.id,
+      // input: 슬라이더 값 유지, derived: baseline + delta
+      value: v.type === 'input'
+        ? (inputValues[v.id] ?? v.baseline)
+        : v.baseline + delta,
+      // 모든 변수의 delta는 사용자 delta + 규칙 압력의 합산
+      delta,
+      displayState: deltaToDisplayState(delta),
+      intensity: deltaToIntensity(delta),
+    };
   }
 
   return states;
@@ -95,7 +88,6 @@ function buildEdgeStates(
 }
 
 function buildTimeline(
-  derivedDeltas: Record<string, number>,
   allDeltas: Record<string, number>,
   allRules: CausalRule[],
 ): {
@@ -109,23 +101,36 @@ function buildTimeline(
     medium: [],
   };
 
-  // 파생 변수별로 관련 규칙 그룹핑
+  // 변수별로 관련 규칙 그룹핑 (target 기준)
   const targetRuleMap: Record<string, CausalRule[]> = {};
   for (const rule of allRules) {
-    if (inputIds.has(rule.target)) continue;
     if (!targetRuleMap[rule.target]) targetRuleMap[rule.target] = [];
     targetRuleMap[rule.target].push(rule);
   }
 
-  // 각 파생 변수에 대해 타임라인 항목 생성
+  // 유의미한 delta가 있는 변수에 대해 타임라인 항목 생성
   for (const [targetId, targetRules] of Object.entries(targetRuleMap)) {
-    const delta = derivedDeltas[targetId] ?? 0;
-    if (Math.abs(delta) < 1) continue;
+    const delta = allDeltas[targetId] ?? 0;
+
+    // input 변수의 경우: 규칙에 의한 압력만 있을 때 표시
+    // (사용자가 직접 변경한 것은 "원인"이므로 타임라인에 안 넣음)
+    const isInput = inputIds.has(targetId);
+    if (isInput) {
+      // 이 input에 영향을 주는 규칙의 실제 효과 합산
+      const rulePressure = targetRules.reduce((sum, rule) => {
+        const sourceDelta = allDeltas[rule.source] ?? 0;
+        if (Math.abs(sourceDelta) < 1) return sum;
+        const dir = rule.direction === 'positive' ? 1 : -1;
+        return sum + sourceDelta * rule.weight * dir;
+      }, 0);
+      if (Math.abs(rulePressure) < 2) continue;
+    } else {
+      if (Math.abs(delta) < 1) continue;
+    }
 
     const variable = variableMap[targetId];
     if (!variable) continue;
 
-    // 해당 target에 영향을 주는 규칙 중 가장 빠른 lag 결정
     const lagPriority: Record<string, number> = {
       immediate: 0,
       short: 1,
@@ -135,12 +140,10 @@ function buildTimeline(
       .filter((r) => Math.abs(allDeltas[r.source] ?? 0) >= 1)
       .sort((a, b) => lagPriority[a.lag] - lagPriority[b.lag])[0]?.lag ?? 'medium';
 
-    // 활성 규칙의 설명 수집
     const activeExplanations = targetRules
       .filter((r) => Math.abs(allDeltas[r.source] ?? 0) >= 1)
       .map((r) => r.explanation);
 
-    // 예외 수집
     const exceptionTexts: string[] = [];
     for (const rule of targetRules) {
       if (!rule.exceptions) continue;
@@ -164,7 +167,6 @@ function buildTimeline(
     timeline[primaryLag].push(item);
   }
 
-  // 각 구간 내에서 delta 절대값 기준 내림차순 정렬
   for (const items of Object.values(timeline)) {
     items.sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
   }
@@ -177,15 +179,22 @@ function buildTimeline(
 }
 
 function generateSummary(
-  derivedDeltas: Record<string, number>,
+  allDeltas: Record<string, number>,
   inputDeltas: Record<string, number>,
 ): string {
-  const significantDerived = Object.entries(derivedDeltas)
-    .filter(([, d]) => Math.abs(d) >= 4)
+  // 파생 변수 + 규칙으로 영향받은 input 변수 중 유의미한 것
+  const significant = Object.entries(allDeltas)
+    .filter(([id, d]) => {
+      if (inputIds.has(id)) {
+        // input의 경우: 사용자 delta와 다르면 규칙 영향이 있다는 뜻
+        const userDelta = inputDeltas[id] ?? 0;
+        return Math.abs(d) >= 4 && Math.abs(d - userDelta) >= 2;
+      }
+      return Math.abs(d) >= 4;
+    })
     .sort(([, a], [, b]) => Math.abs(b) - Math.abs(a));
 
-  if (significantDerived.length === 0) {
-    // 입력 변경이 있는지 확인
+  if (significant.length === 0) {
     const hasInputChange = Object.values(inputDeltas).some((d) => Math.abs(d) >= 4);
     if (!hasInputChange) {
       return '현재 모든 경제 변수가 기준 수준에 있습니다. 좌측 패널에서 변수를 조작하거나 프리셋 시나리오를 선택해보세요.';
@@ -193,7 +202,7 @@ function generateSummary(
     return '현재 입력 변화에 의한 유의미한 시장 영향이 제한적입니다.';
   }
 
-  const top = significantDerived.slice(0, 2);
+  const top = significant.slice(0, 3);
   const descriptions = top.map(([id, delta]) => {
     const v = variableMap[id];
     if (!v) return '';
@@ -224,29 +233,16 @@ function collectExceptions(
 export function runSimulation(
   inputValues: Record<string, number>,
 ): SimulationResult {
-  // 1. 입력 delta 계산
   const inputDeltas = computeInputDeltas(inputValues);
 
-  // 2. DAG 전파 실행
-  const derivedDeltas = propagate(inputDeltas, rules, depths);
+  // 전파: input 변수도 규칙의 target으로 작용, 모든 delta 반환
+  const allDeltas = propagate(inputDeltas, rules, depths);
 
-  // 3. 모든 delta 합침 (입력 + 파생)
-  const allDeltas: Record<string, number> = { ...inputDeltas, ...derivedDeltas };
-
-  // 4. 노드 상태 생성
-  const nodeStates = buildNodeStates(inputValues, inputDeltas, derivedDeltas);
-
-  // 5. 엣지 상태 생성
+  const nodeStates = buildNodeStates(inputValues, allDeltas);
   const edgeStates = buildEdgeStates(allDeltas);
-
-  // 6. 타임라인 생성
-  const timeline = buildTimeline(derivedDeltas, allDeltas, rules);
-
-  // 7. 예외 수집
+  const timeline = buildTimeline(allDeltas, rules);
   const exceptions = collectExceptions(allDeltas);
-
-  // 8. 요약 생성
-  const summary = generateSummary(derivedDeltas, inputDeltas);
+  const summary = generateSummary(allDeltas, inputDeltas);
 
   return {
     nodeStates,

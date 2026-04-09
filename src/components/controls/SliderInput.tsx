@@ -1,6 +1,7 @@
 import type { Region } from '../../domain/types';
 import { RegionBadge } from '../ui/RegionBadge';
 import { regionColors } from '../../styles/tokens';
+import { useStateColors } from '../../hooks/useStateColors';
 
 interface SliderInputProps {
   variableId: string;
@@ -8,6 +9,7 @@ interface SliderInputProps {
   region: Region;
   value: number;
   baseline: number;
+  effectiveDelta?: number;
   onChange: (value: number) => void;
 }
 
@@ -16,60 +18,106 @@ export function SliderInput({
   region,
   value,
   baseline,
+  effectiveDelta,
   onChange,
 }: SliderInputProps) {
-  const delta = value - baseline;
+  const stateColors = useStateColors();
+  const userDelta = value - baseline;
   const color = regionColors[region];
 
-  // delta 부호에 따른 색상
-  const deltaColor =
-    delta > 0
-      ? 'text-emerald-400'
-      : delta < 0
-        ? 'text-rose-400'
-        : 'text-slate-500';
+  // 규칙에 의한 추가 압력
+  const rulePressure = effectiveDelta !== undefined
+    ? effectiveDelta - userDelta
+    : 0;
+  const hasRulePressure = Math.abs(rulePressure) >= 2;
+
+  // 표시용 delta: 유의미한 규칙 압력이 있으면 effectiveDelta, 없으면 userDelta
+  const displayDelta = hasRulePressure ? (effectiveDelta ?? userDelta) : userDelta;
+
+  const deltaColorValue =
+    displayDelta > 0
+      ? stateColors.positive
+      : displayDelta < 0
+        ? stateColors.negative
+        : stateColors.neutral;
+
+  // 규칙 압력 방향에 따른 glow 색상
+  const pressureGlowColor = rulePressure > 0
+    ? stateColors.positive
+    : stateColors.negative;
+
+  // 규칙 압력에 의한 가상 위치 (슬라이더 트랙 위의 마커)
+  const effectivePosition = hasRulePressure
+    ? Math.max(0, Math.min(100, value + rulePressure))
+    : null;
 
   return (
     <div className="flex flex-col gap-1">
-      {/* 상단: 라벨 + 배지 + 값 표시 */}
+      {/* 상단: 라벨 + 배지 + 값 + delta + 외부압력 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5 min-w-0">
           <RegionBadge region={region} size="sm" />
           <span className="text-xs text-slate-300 truncate">{label}</span>
         </div>
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex items-center gap-1 shrink-0">
           <span className="text-xs font-mono text-slate-300">{value}</span>
-          {delta !== 0 && (
-            <span className={`text-[10px] font-mono ${deltaColor}`}>
-              {delta > 0 ? '+' : ''}{delta}
+          {displayDelta !== 0 && (
+            <span
+              className="text-[10px] font-mono"
+              style={{ color: deltaColorValue }}
+            >
+              {displayDelta > 0 ? '+' : ''}{Math.round(displayDelta)}
+            </span>
+          )}
+          {hasRulePressure && (
+            <span
+              className="text-[9px] font-mono"
+              style={{ color: pressureGlowColor }}
+              title={`외부 압력 ${rulePressure > 0 ? '+' : ''}${Math.round(rulePressure)}`}
+            >
+              {rulePressure > 0 ? '▲' : '▼'}
             </span>
           )}
         </div>
       </div>
 
       {/* 슬라이더 */}
-      <input
-        type="range"
-        min={0}
-        max={100}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        aria-label={`${label} 조절 슬라이더`}
-        className="w-full h-1 rounded-full appearance-none cursor-pointer
-          [&::-webkit-slider-thumb]:appearance-none
-          [&::-webkit-slider-thumb]:w-3
-          [&::-webkit-slider-thumb]:h-3
-          [&::-webkit-slider-thumb]:rounded-full
-          [&::-webkit-slider-thumb]:border-none
-          [&::-webkit-slider-thumb]:shadow-md"
-        style={{
-          accentColor: color.primary,
-          background: `linear-gradient(to right, ${color.primary} ${value}%, rgba(100,116,139,0.3) ${value}%)`,
-          // 썸 색상도 국가 색상으로 설정
-          // @ts-expect-error -- CSS 변수로 썸 색상 전달
-          '--thumb-color': color.primary,
-        }}
-      />
+      <div className="relative">
+        <input
+          type="range"
+          min={0}
+          max={100}
+          value={value}
+          onChange={(e) => onChange(Number(e.target.value))}
+          aria-label={`${label} 조절 슬라이더`}
+          className="relative z-10 w-full h-1 rounded-full appearance-none cursor-pointer
+            [&::-webkit-slider-thumb]:appearance-none
+            [&::-webkit-slider-thumb]:w-3
+            [&::-webkit-slider-thumb]:h-3
+            [&::-webkit-slider-thumb]:rounded-full
+            [&::-webkit-slider-thumb]:border-none
+            [&::-webkit-slider-thumb]:shadow-md"
+          style={{
+            accentColor: color.primary,
+            background: `linear-gradient(to right, ${color.primary} ${value}%, rgba(100,116,139,0.3) ${value}%)`,
+            // @ts-expect-error -- CSS 변수로 썸 색상 전달
+            '--thumb-color': color.primary,
+          }}
+        />
+
+        {/* 규칙 압력 마커 — 슬라이더 트랙 위에 표시 */}
+        {effectivePosition !== null && (
+          <div
+            className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full z-0 transition-all duration-300"
+            style={{
+              left: `calc(${effectivePosition}% - 4px)`,
+              backgroundColor: pressureGlowColor,
+              boxShadow: `0 0 6px ${pressureGlowColor}`,
+              opacity: 0.8,
+            }}
+          />
+        )}
+      </div>
 
       <style>{`
         input[type="range"][aria-label="${label} 조절 슬라이더"]::-webkit-slider-thumb {

@@ -4,6 +4,8 @@ import { variables } from '../domain/nodes';
 import { scenarios } from '../domain/scenarios';
 import { runSimulation } from '../domain/simulation/engine';
 
+export type ColorScheme = 'international' | 'korean';
+
 interface SimulationState {
   inputValues: Record<string, number>;
   previousValues: Record<string, number>;
@@ -11,12 +13,14 @@ interface SimulationState {
   selectedNodeId: string | null;
   hoveredNodeId: string | null;
   activeScenarioId: string | null;
+  colorScheme: ColorScheme;
 
   setInputValue: (variableId: string, value: number) => void;
   applyScenario: (scenarioId: string) => void;
   resetToBaseline: () => void;
   selectNode: (nodeId: string | null) => void;
   hoverNode: (nodeId: string | null) => void;
+  toggleColorScheme: () => void;
 }
 
 function getBaselineValues(): Record<string, number> {
@@ -39,6 +43,7 @@ export const useSimulationStore = create<SimulationState>((set) => ({
   selectedNodeId: null,
   hoveredNodeId: null,
   activeScenarioId: null,
+  colorScheme: (localStorage.getItem('epulse_color_scheme') as ColorScheme) ?? 'international',
 
   setInputValue: (variableId, value) =>
     set((state) => {
@@ -77,4 +82,11 @@ export const useSimulationStore = create<SimulationState>((set) => ({
 
   hoverNode: (nodeId) =>
     set({ hoveredNodeId: nodeId }),
+
+  toggleColorScheme: () =>
+    set((state) => {
+      const next = state.colorScheme === 'international' ? 'korean' : 'international';
+      localStorage.setItem('epulse_color_scheme', next);
+      return { colorScheme: next };
+    }),
 }));

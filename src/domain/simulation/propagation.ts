@@ -1,37 +1,75 @@
 import type { CausalRule, ConditionalException } from '../types';
-import { variables } from '../nodes';
 import { clamp } from '../../utils/clamp';
 
 const DAMPING_FACTOR = 0.7;
 
-const inputIds = new Set(
-  variables.filter((v) => v.type === 'input').map((v) => v.id),
-);
-
-// BFS로 각 변수의 입력으로부터의 최소 전파 깊이를 계산
-export function computePropagationDepths(
+// 위상 정렬 (Kahn's algorithm)
+function topologicalSort(
+  varIds: Set<string>,
   rules: CausalRule[],
-): Record<string, number> {
-  const depths: Record<string, number> = {};
+): string[] {
+  const inDegree = new Map<string, number>();
+  const adjacency = new Map<string, string[]>();
 
-  // 입력 변수의 깊이는 0
-  for (const id of inputIds) {
-    depths[id] = 0;
+  for (const id of varIds) {
+    inDegree.set(id, 0);
+    adjacency.set(id, []);
   }
 
-  // 파생 변수만 대상으로 하는 규칙 필터링
-  const effectiveRules = rules.filter((r) => !inputIds.has(r.target));
+  for (const rule of rules) {
+    adjacency.get(rule.source)?.push(rule.target);
+    inDegree.set(rule.target, (inDegree.get(rule.target) ?? 0) + 1);
+  }
 
-  // 반복적으로 깊이 계산 (위상 정렬 대용)
+  // 루트 노드 (incoming 없음)부터 시작
+  const queue: string[] = [];
+  for (const [id, degree] of inDegree) {
+    if (degree === 0) queue.push(id);
+  }
+
+  const order: string[] = [];
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    order.push(current);
+
+    for (const neighbor of adjacency.get(current) ?? []) {
+      const newDegree = (inDegree.get(neighbor) ?? 1) - 1;
+      inDegree.set(neighbor, newDegree);
+      if (newDegree === 0) queue.push(neighbor);
+    }
+  }
+
+  // 순환이 있으면 누락된 변수 추가 (방어적)
+  for (const id of varIds) {
+    if (!order.includes(id)) order.push(id);
+  }
+
+  return order;
+}
+
+// 그래프에서 루트(incoming 규칙 없음)로부터의 최소 깊이 계산
+export function computePropagationDepths(
+  rules: CausalRule[],
+  allVarIds: Set<string>,
+): Record<string, number> {
+  const depths: Record<string, number> = {};
+  const incomingTargets = new Set(rules.map((r) => r.target));
+
+  // 루트 = incoming 규칙이 없는 변수
+  for (const id of allVarIds) {
+    if (!incomingTargets.has(id)) {
+      depths[id] = 0;
+    }
+  }
+
+  // BFS로 깊이 계산
   let changed = true;
   let iterations = 0;
-  const maxIterations = 20;
-
-  while (changed && iterations < maxIterations) {
+  while (changed && iterations < 30) {
     changed = false;
     iterations++;
 
-    for (const rule of effectiveRules) {
+    for (const rule of rules) {
       if (depths[rule.source] === undefined) continue;
 
       const newDepth = depths[rule.source] + 1;
@@ -57,51 +95,59 @@ export function evaluateException(
   });
 }
 
-// DAG 전파 실행
+// DAG 전파 실행 — 위상 정렬 기반, input 변수도 target 허용
 export function propagate(
   inputDeltas: Record<string, number>,
   rules: CausalRule[],
   depths: Record<string, number>,
 ): Record<string, number> {
-  const accumulated: Record<string, number> = {};
+  // 모든 변수 ID 수집
+  const allVarIds = new Set<string>(Object.keys(inputDeltas));
+  for (const rule of rules) {
+    allVarIds.add(rule.source);
+    allVarIds.add(rule.target);
+  }
 
-  // 입력 변수의 delta를 초기화
+  // 위상 정렬
+  const order = topologicalSort(allVarIds, rules);
+
+  // 누적값 초기화 (사용자 입력 delta)
+  const accumulated: Record<string, number> = {};
   for (const [id, delta] of Object.entries(inputDeltas)) {
     accumulated[id] = delta;
   }
 
-  // 규칙을 lag 순서로 정렬
-  const lagOrder: Record<string, number> = {
-    immediate: 0,
-    short: 1,
-    medium: 2,
-  };
-  const sortedRules = [...rules]
-    .filter((r) => !inputIds.has(r.target))
-    .sort((a, b) => lagOrder[a.lag] - lagOrder[b.lag]);
-
-  // 각 규칙 적용
-  for (const rule of sortedRules) {
-    const sourceDelta = accumulated[rule.source] ?? 0;
-    if (sourceDelta === 0) continue;
-
-    const directionMultiplier = rule.direction === 'positive' ? 1 : -1;
-
-    // 감쇠 계수: source의 깊이가 1 이상이면 적용
-    const sourceDepth = depths[rule.source] ?? 0;
-    const damping = sourceDepth >= 1 ? Math.pow(DAMPING_FACTOR, sourceDepth) : 1;
-
-    const effect = sourceDelta * rule.weight * directionMultiplier * damping;
-
-    accumulated[rule.target] = (accumulated[rule.target] ?? 0) + effect;
+  // 규칙을 source별로 그룹핑
+  const rulesBySource = new Map<string, CausalRule[]>();
+  for (const rule of rules) {
+    if (!rulesBySource.has(rule.source)) rulesBySource.set(rule.source, []);
+    rulesBySource.get(rule.source)!.push(rule);
   }
 
-  // 파생 변수만 추출하고 클램핑 적용
+  // 위상 순서대로 처리
+  for (const varId of order) {
+    const sourceDelta = accumulated[varId] ?? 0;
+    if (sourceDelta === 0) continue;
+
+    const outRules = rulesBySource.get(varId) ?? [];
+    for (const rule of outRules) {
+      const directionMultiplier = rule.direction === 'positive' ? 1 : -1;
+
+      // 감쇠: source의 깊이가 2 이상이면 적용
+      const sourceDepth = depths[rule.source] ?? 0;
+      const damping = sourceDepth >= 2
+        ? Math.pow(DAMPING_FACTOR, sourceDepth - 1)
+        : 1;
+
+      const effect = sourceDelta * rule.weight * directionMultiplier * damping;
+      accumulated[rule.target] = (accumulated[rule.target] ?? 0) + effect;
+    }
+  }
+
+  // 모든 변수의 최종 delta를 클램핑하여 반환
   const result: Record<string, number> = {};
   for (const [id, value] of Object.entries(accumulated)) {
-    if (!inputIds.has(id)) {
-      result[id] = clamp(Math.round(value * 10) / 10, -50, 50);
-    }
+    result[id] = clamp(Math.round(value * 10) / 10, -50, 50);
   }
 
   return result;
