@@ -32,14 +32,14 @@ const derivedVariables: EconomicVariable[] = [
   { id: 'usdkrw_pressure', label: '시장환율 기대', region: 'KR', type: 'derived', layer: 'transmission', baseline: 0 },
 
   // 한국 - 시장 레이어
-  { id: 'kr_bond', label: '한국 채권 가격 압력', region: 'KR', type: 'derived', layer: 'market', baseline: 0 },
-  { id: 'kr_stock', label: '한국 주식시장 압력', region: 'KR', type: 'derived', layer: 'market', baseline: 0 },
-  { id: 'kr_commodity', label: '한국 현물 부담', region: 'KR', type: 'derived', layer: 'market', baseline: 0 },
-  { id: 'foreign_flow', label: '외국인 자금 흐름', region: 'KR', type: 'derived', layer: 'market', baseline: 0 },
+  { id: 'kr_bond', label: '한국 채권', region: 'KR', type: 'derived', layer: 'market', baseline: 0 },
+  { id: 'kr_stock', label: '한국 주식', region: 'KR', type: 'derived', layer: 'market', baseline: 0 },
+  { id: 'kr_commodity', label: '한국 현물', region: 'KR', type: 'derived', layer: 'market', baseline: 0 },
+  { id: 'foreign_flow', label: '외국인 자금', region: 'KR', type: 'derived', layer: 'market', baseline: 0 },
 
   // 미국 - 시장 레이어
-  { id: 'us_bond', label: '미국 채권 압력', region: 'US', type: 'derived', layer: 'market', baseline: 0 },
-  { id: 'us_stock', label: '미국 주식 압력', region: 'US', type: 'derived', layer: 'market', baseline: 0 },
+  { id: 'us_bond', label: '미국 채권', region: 'US', type: 'derived', layer: 'market', baseline: 0 },
+  { id: 'us_stock', label: '미국 주식', region: 'US', type: 'derived', layer: 'market', baseline: 0 },
 
 ];
 
@@ -78,7 +78,7 @@ export const nodePositions: Record<string, { x: number; y: number }> = {
   us_rate:       { x: 350, y: 440 },
 
   // 매개 레이어 — GL
-  usd_strength:  { x: 350, y: 480 },
+  usd_strength:  { x: 350, y: 560 },
 
   // 시장 레이어 (x=700) — KR
   kr_bond:       { x: 700, y: 0 },

@@ -37,12 +37,6 @@ export const scenarios: Scenario[] = [
     description: '한국 수출 호조 시나리오',
     changes: { kr_growth: 75, usdkrw: 58, us_growth: 65 },
   },
-  {
-    id: 'risk_on',
-    label: '위험자산 선호 회복',
-    description: '위험 선호 심리 회복 시나리오',
-    changes: { risk: 10, kr_growth: 62, us_growth: 60 },
-  },
 ];
 
 export const scenarioMap: Record<string, Scenario> = Object.fromEntries(
