@@ -6,6 +6,7 @@ import { regionColors } from '../../styles/tokens';
 import { SliderInput } from './SliderInput';
 import { PresetButton } from './PresetButton';
 import type { Region, RealismWarning } from '../../domain/types';
+import { trackEvent } from '../../utils/analytics';
 
 // 국가별 슬라이더 그룹 정의
 const groups: { region: Region; label: string; ids: string[] }[] = [
@@ -55,7 +56,7 @@ export function ControlPanel() {
               key={s.id}
               scenario={s}
               isActive={activeScenarioId === s.id}
-              onClick={() => applyScenario(s.id)}
+              onClick={() => { applyScenario(s.id); trackEvent('scenario_apply', { scenario: s.id }); }}
             />
           ))}
         </div>
@@ -64,7 +65,7 @@ export function ControlPanel() {
       {/* 리셋 버튼 */}
       <button
         type="button"
-        onClick={resetToBaseline}
+        onClick={() => { resetToBaseline(); trackEvent('reset'); }}
         className="w-full h-7 rounded-md text-xs font-medium
           border border-white/[0.06] bg-white/[0.03] text-slate-500
           hover:bg-rose-500/10 hover:text-rose-400 hover:border-rose-500/30

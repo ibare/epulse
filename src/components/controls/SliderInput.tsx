@@ -3,6 +3,7 @@ import type { Region, RealismWarning } from '../../domain/types';
 import { regionColors } from '../../styles/tokens';
 import { useStateColors } from '../../hooks/useStateColors';
 import { WarningBubble } from './WarningBubble';
+import { trackEvent } from '../../utils/analytics';
 
 interface SliderInputProps {
   variableId: string;
@@ -18,6 +19,7 @@ interface SliderInputProps {
 }
 
 export function SliderInput({
+  variableId,
   label,
   region,
   value,
@@ -114,6 +116,7 @@ export function SliderInput({
           max={100}
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
+          onPointerUp={() => trackEvent('slider_change', { variable: variableId, value })}
           aria-label={`${label} 조절 슬라이더`}
           className="relative z-10 w-full h-1 rounded-full appearance-none cursor-pointer
             [&::-webkit-slider-thumb]:appearance-none
