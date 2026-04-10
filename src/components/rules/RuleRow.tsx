@@ -1,5 +1,6 @@
 import type { CausalRule } from '../../domain/types';
 import { variableMap } from '../../domain/nodes';
+import { trackEvent } from '../../utils/analytics';
 
 interface RuleOverride {
   weight: number;
@@ -79,6 +80,7 @@ export function RuleRow({ rule, override, onWeightChange, onReset }: RuleRowProp
           step={0.05}
           value={currentWeight}
           onChange={(e) => onWeightChange(Number(e.target.value))}
+          onPointerUp={() => trackEvent('rule_weight_change', { rule: rule.id, weight: currentWeight })}
           className="flex-1 h-1 rounded-full appearance-none cursor-pointer
             [&::-webkit-slider-thumb]:appearance-none
             [&::-webkit-slider-thumb]:w-3
@@ -101,7 +103,7 @@ export function RuleRow({ rule, override, onWeightChange, onReset }: RuleRowProp
             </span>
             <button
               type="button"
-              onClick={onReset}
+              onClick={() => { onReset(); trackEvent('rule_reset', { rule: rule.id }); }}
               className="text-slate-500 hover:text-amber-400 transition-colors cursor-pointer text-xs"
               title="기본값으로 복원"
               aria-label={`${rule.id} 기본값 복원`}

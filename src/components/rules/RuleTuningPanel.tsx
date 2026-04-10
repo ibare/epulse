@@ -3,6 +3,7 @@ import { rules, RULESET_VERSION } from '../../domain/rules';
 import { variableMap } from '../../domain/nodes';
 import { useRuleTuningStore } from '../../store/ruleTuningStore';
 import { RuleGroup } from './RuleGroup';
+import { trackEvent } from '../../utils/analytics';
 import type { CausalRule, Region } from '../../domain/types';
 
 interface SourceGroup {
@@ -59,7 +60,7 @@ export function RuleTuningPanel({ onClose }: RuleTuningPanelProps) {
           {modifiedCount > 0 && (
             <button
               type="button"
-              onClick={resetAll}
+              onClick={() => { resetAll(); trackEvent('rule_reset_all', { count: modifiedCount }); }}
               className="rounded px-1.5 py-0.5 text-[10px] text-slate-500
                 hover:bg-rose-500/10 hover:text-rose-400 transition-colors cursor-pointer"
             >

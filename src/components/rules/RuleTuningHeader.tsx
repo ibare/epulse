@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useRuleTuningStore } from '../../store/ruleTuningStore';
 import { useSimulationStore } from '../../store/simulationStore';
 import { RULESET_VERSION } from '../../domain/rules';
+import { trackEvent } from '../../utils/analytics';
 
 export function RuleTuningHeader() {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ export function RuleTuningHeader() {
   };
 
   const handleResetAll = () => {
+    trackEvent('rule_reset_all', { count: modifiedCount });
     resetAll();
   };
 
