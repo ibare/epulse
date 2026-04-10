@@ -1,0 +1,56 @@
+# Rules INDEX — trigger-based rule loading
+# 에이전트는 변경 대상 파일의 경로/패턴에 매칭되는 규칙만 로드한다.
+
+always:
+  - principles.md
+
+triggers:
+  # --- Concerns ---
+  - id: C1-dependency-direction
+    file: concerns/C1-dependency-direction.md
+    when:
+      paths: ["src/**"]
+      patterns: ["import "]
+
+  - id: C2-config-centralization
+    file: concerns/C2-config-centralization.md
+    when:
+      paths: ["src/domain/**", "src/utils/formatters.ts"]
+      patterns: ["\\d+\\.\\d+", "= \\d+"]
+
+  - id: C3-store-patterns
+    file: concerns/C3-store-patterns.md
+    when:
+      paths: ["src/store/**"]
+      imports: ["zustand", "create"]
+
+  - id: C4-react-component-conventions
+    file: concerns/C4-react-component-conventions.md
+    when:
+      paths: ["src/components/**/*.tsx"]
+
+  # --- Specifics ---
+  - id: S-simulation
+    file: specifics/S-simulation.md
+    when:
+      paths:
+        - "src/domain/simulation/**"
+        - "src/domain/rules/**"
+        - "src/domain/nodes.ts"
+        - "src/domain/contradictions.ts"
+        - "src/domain/resolveRules.ts"
+
+  - id: S-visualization
+    file: specifics/S-visualization.md
+    when:
+      paths:
+        - "src/domain/views/**"
+        - "src/components/map/**"
+        - "src/components/rate/**"
+        - "src/hooks/useMacroViewData.ts"
+        - "src/hooks/useNodeInteraction.ts"
+
+  # --- Events ---
+  - id: audit-on-commit
+    event: pre-commit
+    action: "rules/ 전체를 로드하여 변경 파일 대상 위반 검사"

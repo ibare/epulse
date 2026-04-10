@@ -34,6 +34,19 @@ export const DELTA_CLAMP_MAX = 50;
 // ─── 강도 정규화 ───────────────────────────────────────
 export const MAX_INTENSITY = 3;
 
+// ─── 모순 검사 임계값 ─────────────────────────────────
+export const CT_INFLATION_HIGH = 65;       // c01, c02: 물가 과열 기준
+export const CT_KR_RATE_LOW = 40;          // c01: 한국 기준금리 저금리 기준
+export const CT_US_RATE_LOW = 45;          // c02: 미국 금리 저금리 기준
+export const CT_GROWTH_HIGH = 70;          // c03: 경기 과열 기준
+export const CT_INFLATION_LOW_GROWTH = 35; // c03: 성장 대비 물가 안정 기준
+export const CT_OIL_HIGH = 70;             // c04: 유가 급등 기준
+export const CT_INFLATION_LOW_OIL = 40;    // c04: 유가 대비 물가 안정 기준
+export const CT_US_RATE_HIGH = 75;         // c05: 미국 고금리 기준
+export const CT_USDKRW_LOW = 40;           // c05: 원화 강세 기준
+export const CT_RISK_LOW = 20;             // c06: 위험회피 낮음 기준
+export const CT_USDKRW_HIGH = 70;          // c06: 원화 약세 기준
+
 // ─── 타임라인 / 요약 ──────────────────────────────────
 export const MIN_RULE_PRESSURE = 2;
 export const MIN_DELTA_FOR_TIMELINE = 1;
