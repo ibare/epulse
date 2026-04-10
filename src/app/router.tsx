@@ -5,6 +5,8 @@ import App from './App';
 const RateDetailPage = lazy(() => import('../pages/RateDetailPage'));
 const StockKrDetailPage = lazy(() => import('../pages/StockKrDetailPage'));
 const StockUsDetailPage = lazy(() => import('../pages/StockUsDetailPage'));
+const BondKrDetailPage = lazy(() => import('../pages/BondKrDetailPage'));
+const BondUsDetailPage = lazy(() => import('../pages/BondUsDetailPage'));
 
 export default function AppRouter() {
   return (
@@ -15,6 +17,8 @@ export default function AppRouter() {
           <Route path="/rate" element={<RateDetailPage />} />
           <Route path="/stock-kr" element={<StockKrDetailPage />} />
           <Route path="/stock-us" element={<StockUsDetailPage />} />
+          <Route path="/bond-kr" element={<BondKrDetailPage />} />
+          <Route path="/bond-us" element={<BondUsDetailPage />} />
         </Routes>
       </Suspense>
     </HashRouter>

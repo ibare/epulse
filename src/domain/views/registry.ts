@@ -9,8 +9,10 @@ import type { DetailViewDef, MacroCollapsedEdge } from './types';
 import { rateView } from './rateView';
 import { stockKrView } from './stockKrView';
 import { stockUsView } from './stockUsView';
+import { bondKrView } from './bondKrView';
+import { bondUsView } from './bondUsView';
 
-const views: DetailViewDef[] = [rateView, stockKrView, stockUsView];
+const views: DetailViewDef[] = [rateView, stockKrView, stockUsView, bondKrView, bondUsView];
 
 // 거시 뷰 노드 ID → 상세 뷰 경로 (CausalMap에서 클릭 시 이동)
 export const entryNodeToPath: Record<string, string> = {};
