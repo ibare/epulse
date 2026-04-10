@@ -21,6 +21,7 @@ import { RateConceptNode, type RateConceptNodeData } from './RateConceptNode';
 import { CausalEdge, type CausalEdgeData } from '../map/CausalEdge';
 import { useSimulationStore } from '../../store/simulationStore';
 import { useRateSimulation } from '../../hooks/useRateSimulation';
+import { useNodePositions } from '../../hooks/useNodePositions';
 import { variableMap } from '../../domain/nodes';
 import { rateView } from '../../domain/views/rateView';
 
@@ -71,7 +72,7 @@ export function RateFlowMap({
 
   // ─── 노드 생성 ──────────────────────────────
 
-  const nodes = useMemo(() => {
+  const computedNodes = useMemo(() => {
     const result_: (Node<EconomicNodeData, 'economic'> | Node<RateConceptNodeData, 'rateConcept'>)[] = [];
 
     // 1열: 입력 노드
@@ -87,7 +88,7 @@ export function RateFlowMap({
         id,
         type: 'economic' as const,
         position: pos,
-        draggable: false,
+        draggable: true,
         data: {
           label: v.label,
           region: v.region,
@@ -114,7 +115,7 @@ export function RateFlowMap({
         id: cs.id,
         type: 'rateConcept' as const,
         position: pos,
-        draggable: false,
+        draggable: true,
         data: {
           label: cs.label,
           description: cs.description,
@@ -141,7 +142,7 @@ export function RateFlowMap({
         id,
         type: 'economic' as const,
         position: pos,
-        draggable: false,
+        draggable: true,
         data: {
           label: id === 'kr_rate' ? '한국 기준금리' : '한국 시장금리',
           region: v.region,
@@ -160,6 +161,8 @@ export function RateFlowMap({
 
     return result_;
   }, [result.nodeStates, pinnedInputs, conceptStates, activeNodeId, hasActiveNode, connectedNodeIds]);
+
+  const { nodes, onNodesChange } = useNodePositions('rate', computedNodes);
 
   // ─── 엣지 생성 ──────────────────────────────
 
@@ -217,6 +220,7 @@ export function RateFlowMap({
         edges={edges}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
+        onNodesChange={onNodesChange}
         onNodeClick={onNodeClick}
         onNodeMouseEnter={onNodeMouseEnter}
         onNodeMouseLeave={onNodeMouseLeave}
@@ -225,7 +229,7 @@ export function RateFlowMap({
         fitViewOptions={{ padding: 0.2 }}
         minZoom={0.3}
         maxZoom={1.5}
-        nodesDraggable={false}
+        nodesDraggable={true}
         nodesConnectable={false}
         elementsSelectable={false}
         proOptions={{ hideAttribution: true }}

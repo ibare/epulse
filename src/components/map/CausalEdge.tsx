@@ -3,9 +3,11 @@ import {
   EdgeLabelRenderer,
   getBezierPath,
   Position,
+  useInternalNode,
   type EdgeProps,
   type Edge,
 } from '@xyflow/react';
+import type { InternalNode } from '@xyflow/system';
 import { useStateColors } from '../../hooks/useStateColors';
 import type { Direction } from '../../domain/types';
 
@@ -24,6 +26,58 @@ type CausalEdgeType = Edge<CausalEdgeData, 'causal'>;
 const CURVATURE = 0.25;
 const SAMPLES = 24;
 
+// ─── Floating Edge 계산 ─────────────────────────
+
+function getNodeCenter(node: InternalNode) {
+  return {
+    x: node.internals.positionAbsolute.x + (node.measured.width ?? 0) / 2,
+    y: node.internals.positionAbsolute.y + (node.measured.height ?? 0) / 2,
+  };
+}
+
+function getNodeIntersection(
+  node: InternalNode,
+  target: { x: number; y: number },
+) {
+  const w = node.measured.width ?? 1;
+  const h = node.measured.height ?? 1;
+  const { x, y } = node.internals.positionAbsolute;
+  const cx = x + w / 2;
+  const cy = y + h / 2;
+
+  const dx = target.x - cx;
+  const dy = target.y - cy;
+  if (dx === 0 && dy === 0) return { x: cx, y: cy };
+
+  const absDx = Math.abs(dx);
+  const absDy = Math.abs(dy);
+
+  if (absDx / w > absDy / h) {
+    // 좌/우 경계면
+    const sign = dx > 0 ? 1 : -1;
+    return { x: cx + sign * (w / 2), y: cy + (dy * (w / 2)) / absDx };
+  }
+  // 상/하 경계면
+  const sign = dy > 0 ? 1 : -1;
+  return { x: cx + (dx * (h / 2)) / absDy, y: cy + sign * (h / 2) };
+}
+
+function toPosition(
+  node: InternalNode,
+  point: { x: number; y: number },
+): Position {
+  const cx =
+    node.internals.positionAbsolute.x + (node.measured.width ?? 0) / 2;
+  const cy =
+    node.internals.positionAbsolute.y + (node.measured.height ?? 0) / 2;
+  const dx = point.x - cx;
+  const dy = point.y - cy;
+  if (Math.abs(dx) > Math.abs(dy)) {
+    return dx > 0 ? Position.Right : Position.Left;
+  }
+  return dy > 0 ? Position.Bottom : Position.Top;
+}
+
 function calcOffset(distance: number): number {
   return Math.abs(distance) >= 0.5
     ? 0.5 * distance
@@ -35,11 +89,12 @@ function getControlPoint(
   x1: number, y1: number,
   x2: number, y2: number,
 ): [number, number] {
+  // Math.abs로 제어점이 항상 노드 바깥 방향을 보장 (floating edge 대응)
   switch (pos) {
-    case Position.Right:  return [x1 + calcOffset(x2 - x1), y1];
-    case Position.Left:   return [x1 - calcOffset(x1 - x2), y1];
-    case Position.Bottom: return [x1, y1 + calcOffset(y2 - y1)];
-    case Position.Top:    return [x1, y1 - calcOffset(y1 - y2)];
+    case Position.Right:  return [x1 + Math.abs(calcOffset(x2 - x1)), y1];
+    case Position.Left:   return [x1 - Math.abs(calcOffset(x1 - x2)), y1];
+    case Position.Bottom: return [x1, y1 + Math.abs(calcOffset(y2 - y1))];
+    case Position.Top:    return [x1, y1 - Math.abs(calcOffset(y1 - y2))];
   }
 }
 
@@ -81,15 +136,19 @@ const ARROW_SIZE = 5;
 const ARROW_ANGLE = Math.tan(Math.PI / 6);
 
 function CausalEdgeComponent({
-  sourceX,
-  sourceY,
-  targetX,
-  targetY,
-  sourcePosition,
-  targetPosition,
+  source,
+  target,
+  sourceX: fallbackSX,
+  sourceY: fallbackSY,
+  targetX: fallbackTX,
+  targetY: fallbackTY,
+  sourcePosition: fallbackSPos,
+  targetPosition: fallbackTPos,
   data,
 }: EdgeProps<CausalEdgeType>) {
   const stateColors = useStateColors();
+  const sourceNode = useInternalNode(source);
+  const targetNode = useInternalNode(target);
   const {
     active = false,
     strength = 0,
@@ -97,6 +156,27 @@ function CausalEdgeComponent({
     isDimmed = false,
     order = 0,
   } = data ?? {};
+
+  // Floating edge: 노드 경계면 교차점 계산
+  let sourceX = fallbackSX;
+  let sourceY = fallbackSY;
+  let targetX = fallbackTX;
+  let targetY = fallbackTY;
+  let sourcePosition = fallbackSPos;
+  let targetPosition = fallbackTPos;
+
+  if (sourceNode && targetNode) {
+    const sc = getNodeCenter(sourceNode);
+    const tc = getNodeCenter(targetNode);
+    const si = getNodeIntersection(sourceNode, tc);
+    const ti = getNodeIntersection(targetNode, sc);
+    sourceX = si.x;
+    sourceY = si.y;
+    targetX = ti.x;
+    targetY = ti.y;
+    sourcePosition = toPosition(sourceNode, si);
+    targetPosition = toPosition(targetNode, ti);
+  }
 
   const [, labelX, labelY] = getBezierPath({
     sourceX, sourceY, targetX, targetY,

@@ -12,6 +12,7 @@ import { CausalEdge } from './CausalEdge';
 import { useSimulationStore } from '../../store/simulationStore';
 import { useNodeInteraction } from '../../hooks/useNodeInteraction';
 import { useMacroViewData } from '../../hooks/useMacroViewData';
+import { useNodePositions } from '../../hooks/useNodePositions';
 import { entryNodeToPath } from '../../domain/views/registry';
 
 const nodeTypes = { economic: EconomicNode };
@@ -24,13 +25,15 @@ export function CausalMap() {
   const { activeNodeId, connectedEdgeIds, connectedNodeIds, selectNode, hoverNode } =
     useNodeInteraction();
 
-  const { nodes, edges } = useMacroViewData(
+  const { nodes: computedNodes, edges } = useMacroViewData(
     result,
     pinnedInputs,
     activeNodeId,
     connectedNodeIds,
     connectedEdgeIds,
   );
+
+  const { nodes, onNodesChange } = useNodePositions('macro', computedNodes);
 
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: Node) => {
@@ -66,6 +69,7 @@ export function CausalMap() {
         edges={edges}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
+        onNodesChange={onNodesChange}
         onNodeClick={onNodeClick}
         onNodeMouseEnter={onNodeMouseEnter}
         onNodeMouseLeave={onNodeMouseLeave}
@@ -74,7 +78,7 @@ export function CausalMap() {
         fitViewOptions={{ padding: 0.15 }}
         minZoom={0.3}
         maxZoom={1.5}
-        nodesDraggable={false}
+        nodesDraggable={true}
         nodesConnectable={false}
         elementsSelectable={false}
         proOptions={{ hideAttribution: true }}

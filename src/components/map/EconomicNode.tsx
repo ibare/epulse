@@ -73,17 +73,15 @@ function EconomicNodeComponent({ data }: NodeProps<EconomicNodeType>) {
       className="relative transition-all duration-300"
       style={{ opacity }}
     >
-      {/* 연결 핸들 */}
-      <Handle
-        type="target"
-        position={Position.Left}
-        className="!w-1.5 !h-1.5 !border-0 !bg-slate-600"
-      />
-      <Handle
-        type="source"
-        position={Position.Right}
-        className="!w-1.5 !h-1.5 !border-0 !bg-slate-600"
-      />
+      {/* 연결 핸들 — 4방향, source+target 겸용 */}
+      <Handle type="target" id="top"    position={Position.Top}    className="!w-0 !h-0 !border-0 !bg-transparent" />
+      <Handle type="target" id="right"  position={Position.Right}  className="!w-0 !h-0 !border-0 !bg-transparent" />
+      <Handle type="target" id="bottom" position={Position.Bottom} className="!w-0 !h-0 !border-0 !bg-transparent" />
+      <Handle type="target" id="left"   position={Position.Left}   className="!w-0 !h-0 !border-0 !bg-transparent" />
+      <Handle type="source" id="top"    position={Position.Top}    className="!w-0 !h-0 !border-0 !bg-transparent" />
+      <Handle type="source" id="right"  position={Position.Right}  className="!w-0 !h-0 !border-0 !bg-transparent" />
+      <Handle type="source" id="bottom" position={Position.Bottom} className="!w-0 !h-0 !border-0 !bg-transparent" />
+      <Handle type="source" id="left"   position={Position.Left}   className="!w-0 !h-0 !border-0 !bg-transparent" />
 
       <div
         className={`

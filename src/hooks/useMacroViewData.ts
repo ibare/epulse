@@ -33,7 +33,7 @@ export function useMacroViewData(
         id: v.id,
         type: 'economic' as const,
         position: pos,
-        draggable: false,
+        draggable: true,
         data: {
           label: v.label,
           region: v.region,
