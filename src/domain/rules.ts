@@ -389,6 +389,46 @@ export const rules: CausalRule[] = [
     lag: 'medium',
     explanation: '미국 금리 인상은 수요 억제를 통해 물가 하락 압력을 줄 수 있습니다.',
   },
+
+  // ──────────────────────────────────────────────
+  // 금 (안전자산)
+  // ──────────────────────────────────────────────
+  {
+    id: 'r41',
+    source: 'kr_inflation',
+    target: 'gold',
+    weight: 0.35,
+    direction: 'positive',
+    lag: 'short',
+    explanation: '물가 상승은 인플레이션 헤지 수요를 자극해 금에 상승 압력으로 작용할 수 있습니다.',
+  },
+  {
+    id: 'r42',
+    source: 'us_rate',
+    target: 'gold',
+    weight: 0.3,
+    direction: 'negative',
+    lag: 'immediate',
+    explanation: '미국 금리 인상은 이자가 없는 금의 상대 매력을 낮춰 하락 압력이 될 수 있습니다.',
+  },
+  {
+    id: 'r43',
+    source: 'usd_strength',
+    target: 'gold',
+    weight: 0.4,
+    direction: 'negative',
+    lag: 'immediate',
+    explanation: '달러 강세는 금 가격에 하락 압력으로 작용하는 경향이 있습니다.',
+  },
+  {
+    id: 'r44',
+    source: 'risk',
+    target: 'gold',
+    weight: 0.35,
+    direction: 'positive',
+    lag: 'immediate',
+    explanation: '위험회피 심리가 확산되면 안전자산인 금에 대한 선호가 높아질 수 있습니다.',
+  },
 ];
 
 export const ruleMap: Record<string, CausalRule> = Object.fromEntries(

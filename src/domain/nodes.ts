@@ -41,6 +41,8 @@ const derivedVariables: EconomicVariable[] = [
   { id: 'us_bond', label: '미국 채권', region: 'US', type: 'derived', layer: 'market', baseline: 0 },
   { id: 'us_stock', label: '미국 주식', region: 'US', type: 'derived', layer: 'market', baseline: 0 },
 
+  // 글로벌 - 시장 레이어
+  { id: 'gold', label: '금', region: 'GL', type: 'derived', layer: 'market', baseline: 0 },
 ];
 
 export const variables: EconomicVariable[] = [
@@ -90,4 +92,6 @@ export const nodePositions: Record<string, { x: number; y: number }> = {
   us_bond:       { x: 700, y: 440 },
   us_stock:      { x: 700, y: 540 },
 
+  // 시장 레이어 — GL
+  gold:          { x: 700, y: 640 },
 };
