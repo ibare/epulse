@@ -1,7 +1,12 @@
 import type { CausalRule, ConditionalException } from '../types';
 import { clamp } from '../../utils/clamp';
-
-const DAMPING_FACTOR = 0.7;
+import {
+  DAMPING_FACTOR,
+  DAMPING_MIN_DEPTH,
+  MAX_ITERATIONS,
+  DELTA_CLAMP_MIN,
+  DELTA_CLAMP_MAX,
+} from './config';
 
 // 위상 정렬 (Kahn's algorithm)
 function topologicalSort(
@@ -65,7 +70,7 @@ export function computePropagationDepths(
   // BFS로 깊이 계산
   let changed = true;
   let iterations = 0;
-  while (changed && iterations < 30) {
+  while (changed && iterations < MAX_ITERATIONS) {
     changed = false;
     iterations++;
 
@@ -133,9 +138,9 @@ export function propagate(
     for (const rule of outRules) {
       const directionMultiplier = rule.direction === 'positive' ? 1 : -1;
 
-      // 감쇠: source의 깊이가 2 이상이면 적용
+      // 감쇠: source의 깊이가 DAMPING_MIN_DEPTH 이상이면 적용
       const sourceDepth = depths[rule.source] ?? 0;
-      const damping = sourceDepth >= 2
+      const damping = sourceDepth >= DAMPING_MIN_DEPTH
         ? Math.pow(DAMPING_FACTOR, sourceDepth - 1)
         : 1;
 
@@ -147,7 +152,7 @@ export function propagate(
   // 모든 변수의 최종 delta를 클램핑하여 반환
   const result: Record<string, number> = {};
   for (const [id, value] of Object.entries(accumulated)) {
-    result[id] = clamp(Math.round(value * 10) / 10, -50, 50);
+    result[id] = clamp(Math.round(value * 10) / 10, DELTA_CLAMP_MIN, DELTA_CLAMP_MAX);
   }
 
   return result;

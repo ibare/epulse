@@ -1,12 +1,12 @@
 import { useMemo } from 'react';
-import { useSimulationStore } from '../store/simulationStore';
+import { useUIStore } from '../store/uiStore';
 import { rules } from '../domain/rules';
 
 export function useNodeInteraction() {
-  const selectedNodeId = useSimulationStore((s) => s.selectedNodeId);
-  const hoveredNodeId = useSimulationStore((s) => s.hoveredNodeId);
-  const selectNode = useSimulationStore((s) => s.selectNode);
-  const hoverNode = useSimulationStore((s) => s.hoverNode);
+  const selectedNodeId = useUIStore((s) => s.selectedNodeId);
+  const hoveredNodeId = useUIStore((s) => s.hoveredNodeId);
+  const selectNode = useUIStore((s) => s.selectNode);
+  const hoverNode = useUIStore((s) => s.hoverNode);
 
   const activeNodeId = hoveredNodeId ?? selectedNodeId;
 

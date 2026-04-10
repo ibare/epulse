@@ -32,7 +32,6 @@ function EconomicNodeComponent({ data }: NodeProps<EconomicNodeType>) {
     delta,
     displayState,
     intensity,
-    layer,
     isSelected,
     isDimmed,
     isPinned,
@@ -75,20 +74,16 @@ function EconomicNodeComponent({ data }: NodeProps<EconomicNodeType>) {
       style={{ opacity }}
     >
       {/* 연결 핸들 */}
-      {layer !== 'cause' && (
-        <Handle
-          type="target"
-          position={Position.Left}
-          className="!w-1.5 !h-1.5 !border-0 !bg-slate-600"
-        />
-      )}
-      {layer !== 'market' && (
-        <Handle
-          type="source"
-          position={Position.Right}
-          className="!w-1.5 !h-1.5 !border-0 !bg-slate-600"
-        />
-      )}
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="!w-1.5 !h-1.5 !border-0 !bg-slate-600"
+      />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="!w-1.5 !h-1.5 !border-0 !bg-slate-600"
+      />
 
       <div
         className={`

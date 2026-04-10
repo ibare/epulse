@@ -1,4 +1,4 @@
-import { useSimulationStore } from '../store/simulationStore';
+import { useUIStore } from '../store/uiStore';
 
 const colorSets = {
   international: {
@@ -16,6 +16,6 @@ const colorSets = {
 export type StateColors = (typeof colorSets)[keyof typeof colorSets];
 
 export function useStateColors(): StateColors {
-  const colorScheme = useSimulationStore((s) => s.colorScheme);
+  const colorScheme = useUIStore((s) => s.colorScheme);
   return colorSets[colorScheme];
 }

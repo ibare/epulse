@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useSimulationStore } from '../../store/simulationStore';
+import { useUIStore } from '../../store/uiStore';
 import { useRuleTuningStore } from '../../store/ruleTuningStore';
 import { viewByPath } from '../../domain/views/registry';
 
@@ -12,8 +12,8 @@ interface HeaderProps {
 export function Header({ onToggleLeft, onToggleRight, onToggleRules }: HeaderProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const colorScheme = useSimulationStore((s) => s.colorScheme);
-  const toggleColorScheme = useSimulationStore((s) => s.toggleColorScheme);
+  const colorScheme = useUIStore((s) => s.colorScheme);
+  const toggleColorScheme = useUIStore((s) => s.toggleColorScheme);
   const modifiedCount = useRuleTuningStore((s) => Object.keys(s.overrides).length);
 
   const isSubPage = location.pathname !== '/';

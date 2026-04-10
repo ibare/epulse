@@ -6,12 +6,20 @@ export function OnboardingModal() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const seen = localStorage.getItem(STORAGE_KEY);
-    if (!seen) setIsVisible(true);
+    try {
+      const seen = localStorage.getItem(STORAGE_KEY);
+      if (!seen) setIsVisible(true);
+    } catch {
+      setIsVisible(true);
+    }
   }, []);
 
   const handleClose = () => {
-    localStorage.setItem(STORAGE_KEY, 'true');
+    try {
+      localStorage.setItem(STORAGE_KEY, 'true');
+    } catch {
+      // localStorage 접근 불가 시 무시
+    }
     setIsVisible(false);
   };
 

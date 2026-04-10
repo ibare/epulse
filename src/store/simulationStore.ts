@@ -8,8 +8,7 @@ import {
   checkContradictions,
 } from '../domain/simulation/engine';
 import { clamp } from '../utils/clamp';
-
-export type ColorScheme = 'international' | 'korean';
+import { useRuleTuningStore } from './ruleTuningStore';
 
 const inputVariables = variables.filter((v) => v.type === 'input');
 
@@ -19,19 +18,13 @@ interface SimulationState {
   pinnedInputs: Set<string>;
   realismWarnings: RealismWarning[];
   result: SimulationResult;
-  selectedNodeId: string | null;
-  hoveredNodeId: string | null;
   activeScenarioId: string | null;
-  colorScheme: ColorScheme;
 
   setInputValue: (variableId: string, value: number) => void;
   unpinInput: (variableId: string) => void;
   applyScenario: (scenarioId: string) => void;
   resetToBaseline: () => void;
   recompute: () => void;
-  selectNode: (nodeId: string | null) => void;
-  hoverNode: (nodeId: string | null) => void;
-  toggleColorScheme: () => void;
 }
 
 function getBaselineValues(): Record<string, number> {
@@ -47,8 +40,10 @@ function getBaselineValues(): Record<string, number> {
 const baselineValues = getBaselineValues();
 const initialResult = runSimulation(baselineValues);
 
-// 소프트 커플링 시뮬레이션 실행 헬퍼
-// 고정 input은 사용자 값, 비고정 input은 baseline → 전파 → 비고정 슬라이더 자동 조정
+function getOverrides() {
+  return useRuleTuningStore.getState().overrides;
+}
+
 function computeWithPins(
   pinnedInputs: Set<string>,
   pinnedValues: Record<string, number>,
@@ -57,7 +52,6 @@ function computeWithPins(
   result: SimulationResult;
   realismWarnings: RealismWarning[];
 } {
-  // 시뮬레이션 입력: 고정=사용자값, 비고정=baseline
   const simInputs: Record<string, number> = {};
   for (const v of inputVariables) {
     simInputs[v.id] = pinnedInputs.has(v.id)
@@ -65,13 +59,9 @@ function computeWithPins(
       : v.baseline;
   }
 
-  // 모순 체크 (고정 입력값 기준)
   const warnings = checkContradictions(simInputs, pinnedInputs);
+  const result = runSimulationWithPins(simInputs, pinnedInputs, warnings, getOverrides());
 
-  // 고정 input을 target으로 삼는 규칙 제외하고 시뮬레이션
-  const result = runSimulationWithPins(simInputs, pinnedInputs, warnings);
-
-  // 비고정 input의 표시값: baseline + 규칙에 의한 delta
   const finalInputValues: Record<string, number> = {};
   for (const v of inputVariables) {
     if (pinnedInputs.has(v.id)) {
@@ -86,7 +76,6 @@ function computeWithPins(
     }
   }
 
-  // 비고정 input의 nodeState.value도 표시값으로 보정
   for (const v of inputVariables) {
     if (!pinnedInputs.has(v.id) && result.nodeStates[v.id]) {
       result.nodeStates[v.id].value = finalInputValues[v.id];
@@ -102,17 +91,13 @@ export const useSimulationStore = create<SimulationState>((set) => ({
   pinnedInputs: new Set<string>(),
   realismWarnings: [],
   result: initialResult,
-  selectedNodeId: null,
-  hoveredNodeId: null,
   activeScenarioId: null,
-  colorScheme: (localStorage.getItem('epulse_color_scheme') as ColorScheme) ?? 'international',
 
   setInputValue: (variableId, value) =>
     set((state) => {
       const newPinned = new Set(state.pinnedInputs);
       newPinned.add(variableId);
 
-      // 고정 입력값 모음: 기존 고정 + 새로 변경된 값
       const pinnedValues: Record<string, number> = {};
       for (const v of inputVariables) {
         if (v.id === variableId) {
@@ -138,7 +123,6 @@ export const useSimulationStore = create<SimulationState>((set) => ({
       const newPinned = new Set(state.pinnedInputs);
       newPinned.delete(variableId);
 
-      // 나머지 고정값 유지
       const pinnedValues: Record<string, number> = {};
       for (const v of inputVariables) {
         if (newPinned.has(v.id)) {
@@ -161,7 +145,6 @@ export const useSimulationStore = create<SimulationState>((set) => ({
       const scenario = scenarios.find((s) => s.id === scenarioId);
       if (!scenario) return state;
 
-      // 시나리오가 변경하는 input만 고정
       const newPinned = new Set(Object.keys(scenario.changes));
 
       const pinnedValues: Record<string, number> = {};
@@ -186,7 +169,7 @@ export const useSimulationStore = create<SimulationState>((set) => ({
       previousValues: { ...state.inputValues },
       pinnedInputs: new Set<string>(),
       inputValues: { ...baselineValues },
-      result: runSimulation(baselineValues),
+      result: runSimulation(baselineValues, getOverrides()),
       realismWarnings: [],
       activeScenarioId: null,
     })),
@@ -194,7 +177,7 @@ export const useSimulationStore = create<SimulationState>((set) => ({
   recompute: () =>
     set((state) => {
       if (state.pinnedInputs.size === 0) {
-        return { result: runSimulation(state.inputValues) };
+        return { result: runSimulation(state.inputValues, getOverrides()) };
       }
       const pinnedValues: Record<string, number> = {};
       for (const v of inputVariables) {
@@ -208,18 +191,5 @@ export const useSimulationStore = create<SimulationState>((set) => ({
         result: computed.result,
         realismWarnings: computed.realismWarnings,
       };
-    }),
-
-  selectNode: (nodeId) =>
-    set({ selectedNodeId: nodeId }),
-
-  hoverNode: (nodeId) =>
-    set({ hoveredNodeId: nodeId }),
-
-  toggleColorScheme: () =>
-    set((state) => {
-      const next = state.colorScheme === 'international' ? 'korean' : 'international';
-      localStorage.setItem('epulse_color_scheme', next);
-      return { colorScheme: next };
     }),
 }));

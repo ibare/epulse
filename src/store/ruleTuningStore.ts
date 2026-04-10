@@ -30,18 +30,23 @@ function loadFromStorage(): Record<string, RuleOverride> {
       return {};
     }
     return data.rules;
-  } catch {
+  } catch (error) {
+    console.warn('[epulse] localStorage 읽기 실패:', error);
     return {};
   }
 }
 
 function saveToStorage(overrides: Record<string, RuleOverride>): void {
-  const data: PersistedData = {
-    version: RULESET_VERSION,
-    updatedAt: new Date().toISOString(),
-    rules: overrides,
-  };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  try {
+    const data: PersistedData = {
+      version: RULESET_VERSION,
+      updatedAt: new Date().toISOString(),
+      rules: overrides,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (error) {
+    console.warn('[epulse] localStorage 저장 실패:', error);
+  }
 }
 
 export const useRuleTuningStore = create<RuleTuningState>((set) => ({
