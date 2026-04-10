@@ -10,26 +10,26 @@ import type { DetailViewDef } from './types';
 // ─── 특화 라벨 함수 ─────────────────────────────────
 
 function dollarDemandLabel(delta: number): string {
-  if (delta >= 20) return '강한 수요';
-  if (delta >= 8) return '수요 증가';
-  if (delta >= -7) return '중립';
-  if (delta >= -19) return '수요 감소';
+  if (delta >= 11) return '강한 수요';
+  if (delta >= 4) return '수요 증가';
+  if (delta >= -3) return '중립';
+  if (delta >= -10) return '수요 감소';
   return '강한 수요 감소';
 }
 
 function krwAttractivenessLabel(delta: number): string {
-  if (delta >= 20) return '매우 높음';
-  if (delta >= 8) return '높음';
-  if (delta >= -7) return '중립';
-  if (delta >= -19) return '낮음';
+  if (delta >= 11) return '매우 높음';
+  if (delta >= 4) return '높음';
+  if (delta >= -3) return '중립';
+  if (delta >= -10) return '낮음';
   return '매우 낮음';
 }
 
 function capitalFlightLabel(delta: number): string {
-  if (delta >= 20) return '강한 이탈 압력';
-  if (delta >= 8) return '이탈 압력';
-  if (delta >= -7) return '중립';
-  if (delta >= -19) return '유입 압력';
+  if (delta >= 11) return '강한 이탈 압력';
+  if (delta >= 4) return '이탈 압력';
+  if (delta >= -3) return '중립';
+  if (delta >= -10) return '유입 압력';
   return '강한 유입 압력';
 }
 

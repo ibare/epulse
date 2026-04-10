@@ -10,18 +10,18 @@ import type { DetailViewDef } from './types';
 // ─── 특화 라벨 함수 ─────────────────────────────────
 
 function stanceLabel(delta: number): string {
-  if (delta >= 20) return '강한 긴축';
-  if (delta >= 8) return '긴축';
-  if (delta >= -7) return '중립';
-  if (delta >= -19) return '완화';
+  if (delta >= 11) return '강한 긴축';
+  if (delta >= 4) return '긴축';
+  if (delta >= -3) return '중립';
+  if (delta >= -10) return '완화';
   return '강한 완화';
 }
 
 function expectationLabel(delta: number): string {
-  if (delta >= 20) return '강한 인상 기대';
-  if (delta >= 8) return '인상 기대';
-  if (delta >= -7) return '중립';
-  if (delta >= -19) return '인하 기대';
+  if (delta >= 11) return '강한 인상 기대';
+  if (delta >= 4) return '인상 기대';
+  if (delta >= -3) return '중립';
+  if (delta >= -10) return '인하 기대';
   return '강한 인하 기대';
 }
 

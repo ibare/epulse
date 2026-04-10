@@ -10,26 +10,26 @@ import type { DetailViewDef } from './types';
 // ─── 특화 라벨 함수 ─────────────────────────────────
 
 function earningsLabel(delta: number): string {
-  if (delta >= 20) return '강한 이익 개선';
-  if (delta >= 8) return '이익 개선';
-  if (delta >= -7) return '중립';
-  if (delta >= -19) return '이익 악화';
+  if (delta >= 11) return '강한 이익 개선';
+  if (delta >= 4) return '이익 개선';
+  if (delta >= -3) return '중립';
+  if (delta >= -10) return '이익 악화';
   return '강한 이익 악화';
 }
 
 function discountLabel(delta: number): string {
-  if (delta >= 20) return '강한 부담';
-  if (delta >= 8) return '부담';
-  if (delta >= -7) return '중립';
-  if (delta >= -19) return '부담 완화';
+  if (delta >= 11) return '강한 부담';
+  if (delta >= 4) return '부담';
+  if (delta >= -3) return '중립';
+  if (delta >= -10) return '부담 완화';
   return '강한 완화';
 }
 
 function sentimentLabel(delta: number): string {
-  if (delta >= 20) return '강한 낙관';
-  if (delta >= 8) return '낙관';
-  if (delta >= -7) return '중립';
-  if (delta >= -19) return '비관';
+  if (delta >= 11) return '강한 낙관';
+  if (delta >= 4) return '낙관';
+  if (delta >= -3) return '중립';
+  if (delta >= -10) return '비관';
   return '강한 비관';
 }
 

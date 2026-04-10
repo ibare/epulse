@@ -10,26 +10,26 @@ import type { DetailViewDef } from './types';
 // ─── 특화 라벨 함수 ─────────────────────────────────
 
 function rateBurdenLabel(delta: number): string {
-  if (delta >= 20) return '강한 금리 부담';
-  if (delta >= 8) return '금리 부담';
-  if (delta >= -7) return '중립';
-  if (delta >= -19) return '금리 완화';
+  if (delta >= 11) return '강한 금리 부담';
+  if (delta >= 4) return '금리 부담';
+  if (delta >= -3) return '중립';
+  if (delta >= -10) return '금리 완화';
   return '강한 금리 완화';
 }
 
 function creditLabel(delta: number): string {
-  if (delta >= 20) return '강한 신용 양호';
-  if (delta >= 8) return '신용 양호';
-  if (delta >= -7) return '중립';
-  if (delta >= -19) return '신용 악화';
+  if (delta >= 11) return '강한 신용 양호';
+  if (delta >= 4) return '신용 양호';
+  if (delta >= -3) return '중립';
+  if (delta >= -10) return '신용 악화';
   return '강한 신용 악화';
 }
 
 function foreignBondLabel(delta: number): string {
-  if (delta >= 20) return '강한 유입';
-  if (delta >= 8) return '유입';
-  if (delta >= -7) return '중립';
-  if (delta >= -19) return '유출';
+  if (delta >= 11) return '강한 유입';
+  if (delta >= 4) return '유입';
+  if (delta >= -3) return '중립';
+  if (delta >= -10) return '유출';
   return '강한 유출';
 }
 
