@@ -42,7 +42,7 @@ const derivedVariables: EconomicVariable[] = [
   { id: 'us_stock', label: '미국 주식', region: 'US', type: 'derived', layer: 'market', baseline: 0 },
 
   // 글로벌 - 시장 레이어
-  { id: 'gold', label: '금', region: 'GL', type: 'derived', layer: 'market', baseline: 0 },
+  { id: 'gold', label: '금(안전자산시장)', region: 'GL', type: 'derived', layer: 'market', baseline: 0 },
 ];
 
 export const variables: EconomicVariable[] = [
