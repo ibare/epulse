@@ -11,8 +11,9 @@ import { stockKrView } from './stockKrView';
 import { stockUsView } from './stockUsView';
 import { bondKrView } from './bondKrView';
 import { bondUsView } from './bondUsView';
+import { fxView } from './fxView';
 
-const views: DetailViewDef[] = [rateView, stockKrView, stockUsView, bondKrView, bondUsView];
+const views: DetailViewDef[] = [rateView, stockKrView, stockUsView, bondKrView, bondUsView, fxView];
 
 // 거시 뷰 노드 ID → 상세 뷰 경로 (CausalMap에서 클릭 시 이동)
 export const entryNodeToPath: Record<string, string> = {};

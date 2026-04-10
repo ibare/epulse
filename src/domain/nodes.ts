@@ -70,6 +70,11 @@ const derivedVariables: EconomicVariable[] = [
   { id: 'rate_burden_us',      label: '금리 부담',    region: 'US', type: 'derived', layer: 'concept', baseline: 0 },
   { id: 'credit_condition_us', label: '신용 상태',    region: 'US', type: 'derived', layer: 'concept', baseline: 0 },
   { id: 'safe_haven_demand',   label: '안전자산 수요', region: 'US', type: 'derived', layer: 'concept', baseline: 0 },
+
+  // 환율 개념 노드
+  { id: 'dollar_demand_fx',       label: '달러 수요',     region: 'KR', type: 'derived', layer: 'concept', baseline: 0 },
+  { id: 'krw_attractiveness_fx',  label: '원화 매력도',   region: 'KR', type: 'derived', layer: 'concept', baseline: 0 },
+  { id: 'capital_flight_fx',      label: '자본 유출 압력', region: 'KR', type: 'derived', layer: 'concept', baseline: 0 },
 ];
 
 export const variables: EconomicVariable[] = [
