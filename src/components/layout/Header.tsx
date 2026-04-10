@@ -1,13 +1,16 @@
 import { useSimulationStore } from '../../store/simulationStore';
+import { useRuleTuningStore } from '../../store/ruleTuningStore';
 
 interface HeaderProps {
   onToggleLeft?: () => void;
   onToggleRight?: () => void;
+  onToggleRules?: () => void;
 }
 
-export function Header({ onToggleLeft, onToggleRight }: HeaderProps) {
+export function Header({ onToggleLeft, onToggleRight, onToggleRules }: HeaderProps) {
   const colorScheme = useSimulationStore((s) => s.colorScheme);
   const toggleColorScheme = useSimulationStore((s) => s.toggleColorScheme);
+  const modifiedCount = useRuleTuningStore((s) => Object.keys(s.overrides).length);
 
   return (
     <header className="flex h-12 shrink-0 items-center justify-between border-b border-slate-800/50 px-4">
@@ -29,9 +32,28 @@ export function Header({ onToggleLeft, onToggleRight }: HeaderProps) {
         </span>
       </div>
       <div className="flex items-center gap-3">
-        <span className="text-[10px] text-slate-600">
+        <span className="hidden text-[10px] text-slate-600 sm:inline">
           학습 도구 · 투자 예측 아님
         </span>
+        {/* 규칙 튜닝 버튼 */}
+        <button
+          type="button"
+          onClick={onToggleRules}
+          className="flex items-center gap-1 rounded-md border border-white/[0.06] bg-white/[0.03]
+            px-2 py-1 text-[10px] text-slate-400 transition-all duration-150
+            hover:border-white/[0.12] hover:text-slate-300 cursor-pointer"
+          aria-label="규칙 튜닝 화면 열기"
+        >
+          <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor" className="shrink-0">
+            <path d="M9.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM1 2.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm11 0a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zM4.5 6a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM1 7.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5zm6 0a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 0 1h-8a.5.5 0 0 1-.5-.5zm-5 5a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 0 1h-8a.5.5 0 0 1-.5-.5zm12.5-.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm-2 1.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5z" />
+          </svg>
+          <span className="hidden sm:inline">규칙 튜닝</span>
+          {modifiedCount > 0 && (
+            <span className="inline-flex items-center justify-center rounded-full bg-amber-500/20 text-amber-400 text-[9px] font-bold min-w-[14px] h-[14px] px-1">
+              {modifiedCount}
+            </span>
+          )}
+        </button>
         {/* 색상 스킴 토글 */}
         <button
           type="button"

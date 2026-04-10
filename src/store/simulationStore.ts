@@ -28,6 +28,7 @@ interface SimulationState {
   unpinInput: (variableId: string) => void;
   applyScenario: (scenarioId: string) => void;
   resetToBaseline: () => void;
+  recompute: () => void;
   selectNode: (nodeId: string | null) => void;
   hoverNode: (nodeId: string | null) => void;
   toggleColorScheme: () => void;
@@ -185,10 +186,29 @@ export const useSimulationStore = create<SimulationState>((set) => ({
       previousValues: { ...state.inputValues },
       pinnedInputs: new Set<string>(),
       inputValues: { ...baselineValues },
-      result: initialResult,
+      result: runSimulation(baselineValues),
       realismWarnings: [],
       activeScenarioId: null,
     })),
+
+  recompute: () =>
+    set((state) => {
+      if (state.pinnedInputs.size === 0) {
+        return { result: runSimulation(state.inputValues) };
+      }
+      const pinnedValues: Record<string, number> = {};
+      for (const v of inputVariables) {
+        if (state.pinnedInputs.has(v.id)) {
+          pinnedValues[v.id] = state.inputValues[v.id];
+        }
+      }
+      const computed = computeWithPins(state.pinnedInputs, pinnedValues);
+      return {
+        inputValues: computed.inputValues,
+        result: computed.result,
+        realismWarnings: computed.realismWarnings,
+      };
+    }),
 
   selectNode: (nodeId) =>
     set({ selectedNodeId: nodeId }),

@@ -1,5 +1,7 @@
 import type { CausalRule } from './types';
 
+export const RULESET_VERSION = '1.0';
+
 export const rules: CausalRule[] = [
   // ──────────────────────────────────────────────
   // 물가 → 금리

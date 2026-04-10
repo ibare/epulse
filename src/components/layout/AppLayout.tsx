@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { Header } from './Header';
 import { Footer } from './Footer';
 import { OnboardingModal } from './OnboardingModal';
+import { RuleTuningPanel } from '../rules/RuleTuningPanel';
 
 interface AppLayoutProps {
   left: ReactNode;
@@ -12,6 +13,7 @@ interface AppLayoutProps {
 export function AppLayout({ left, center, right }: AppLayoutProps) {
   const [showLeft, setShowLeft] = useState(false);
   const [showRight, setShowRight] = useState(false);
+  const [showRules, setShowRules] = useState(false);
 
   return (
     <div className="flex h-full flex-col bg-surface-primary">
@@ -19,6 +21,7 @@ export function AppLayout({ left, center, right }: AppLayoutProps) {
       <Header
         onToggleLeft={() => { setShowLeft(!showLeft); setShowRight(false); }}
         onToggleRight={() => { setShowRight(!showRight); setShowLeft(false); }}
+        onToggleRules={() => setShowRules(!showRules)}
       />
       <div className="relative flex min-h-0 flex-1">
         {/* 좌측 조작 패널 - 데스크톱 */}
@@ -49,6 +52,13 @@ export function AppLayout({ left, center, right }: AppLayoutProps) {
         {showRight && (
           <aside className="absolute inset-y-0 right-0 z-40 w-[300px] overflow-y-auto border-l border-slate-800/50 bg-surface-primary p-3 lg:hidden">
             {right}
+          </aside>
+        )}
+
+        {/* 규칙 튜닝 패널 - 우측 오버레이 */}
+        {showRules && (
+          <aside className="absolute inset-y-0 right-0 z-50 w-[360px] border-l border-slate-800/50 bg-surface-primary shadow-2xl shadow-black/50">
+            <RuleTuningPanel onClose={() => setShowRules(false)} />
           </aside>
         )}
       </div>

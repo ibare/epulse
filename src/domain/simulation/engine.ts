@@ -8,7 +8,7 @@ import type {
 } from '../types';
 import { checkContradictions } from '../contradictions';
 import { variables, variableMap } from '../nodes';
-import { rules } from '../rules';
+import { getResolvedRules } from '../resolveRules';
 import {
   propagate,
   computePropagationDepths,
@@ -20,9 +20,7 @@ import {
   intensityToStrength,
 } from './stateMapper';
 
-// 모든 변수 ID를 수집하여 깊이 계산
 const allVarIds = new Set(variables.map((v) => v.id));
-const depths = computePropagationDepths(rules, allVarIds);
 
 const inputIds = new Set(
   variables.filter((v) => v.type === 'input').map((v) => v.id),
@@ -68,6 +66,7 @@ function buildNodeStates(
 function buildEdgeStates(
   allDeltas: Record<string, number>,
   propagationDepths: Record<string, number>,
+  rules: CausalRule[],
 ): Record<string, EdgeState> {
   const states: Record<string, EdgeState> = {};
 
@@ -219,6 +218,7 @@ function generateSummary(
 
 function collectExceptions(
   allDeltas: Record<string, number>,
+  rules: CausalRule[],
 ): Array<{ ruleId: string; text: string }> {
   const result: Array<{ ruleId: string; text: string }> = [];
 
@@ -237,15 +237,16 @@ function collectExceptions(
 export function runSimulation(
   inputValues: Record<string, number>,
 ): SimulationResult {
+  const rules = getResolvedRules();
+  const depths = computePropagationDepths(rules, allVarIds);
   const inputDeltas = computeInputDeltas(inputValues);
 
-  // 전파: input 변수도 규칙의 target으로 작용, 모든 delta 반환
   const allDeltas = propagate(inputDeltas, rules, depths);
 
   const nodeStates = buildNodeStates(inputValues, allDeltas);
-  const edgeStates = buildEdgeStates(allDeltas, depths);
+  const edgeStates = buildEdgeStates(allDeltas, depths, rules);
   const timeline = buildTimeline(allDeltas, rules);
-  const exceptions = collectExceptions(allDeltas);
+  const exceptions = collectExceptions(allDeltas, rules);
   const summary = generateSummary(allDeltas, inputDeltas);
 
   return {
@@ -266,6 +267,8 @@ export function runSimulationWithPins(
   pinnedInputs: Set<string>,
   warnings: RealismWarning[],
 ): SimulationResult {
+  const rules = getResolvedRules();
+  const depths = computePropagationDepths(rules, allVarIds);
   const inputDeltas = computeInputDeltas(inputValues);
 
   // 고정 input을 target으로 삼는 규칙 필터링
@@ -276,10 +279,10 @@ export function runSimulationWithPins(
 
   const nodeStates = buildNodeStates(inputValues, allDeltas);
   // 엣지 상태는 전체 규칙으로 평가 (필터링된 규칙이라도 시각적으로 표시)
-  const edgeStates = buildEdgeStates(allDeltas, depths);
+  const edgeStates = buildEdgeStates(allDeltas, depths, rules);
   // 타임라인도 전체 규칙으로 설명 텍스트 생성
   const timeline = buildTimeline(allDeltas, rules);
-  const exceptions = collectExceptions(allDeltas);
+  const exceptions = collectExceptions(allDeltas, rules);
   const summary = generateSummary(allDeltas, inputDeltas);
 
   return {
