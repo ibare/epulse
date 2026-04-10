@@ -135,7 +135,7 @@ export function RateFlowMap({
     return result_;
   }, [result.nodeStates, pinnedInputs, conceptStates, activeNodeId, connectedNodeIds]);
 
-  const { nodes, onNodesChange } = useNodePositions('rate', computedNodes);
+  const { nodes, onNodesChange } = useNodePositions<Record<string, unknown>>('rate', computedNodes);
 
   // ─── 엣지 생성 ──────────────────────────────
 

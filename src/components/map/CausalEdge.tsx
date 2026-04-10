@@ -6,8 +6,8 @@ import {
   useInternalNode,
   type EdgeProps,
   type Edge,
+  type InternalNode,
 } from '@xyflow/react';
-import type { InternalNode } from '@xyflow/system';
 import { useStateColors } from '../../hooks/useStateColors';
 import type { Direction } from '../../domain/types';
 

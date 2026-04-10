@@ -137,7 +137,7 @@ export function BondFlowMap({
     return result_;
   }, [viewDef, result.nodeStates, pinnedInputs, conceptStates, activeNodeId, connectedNodeIds]);
 
-  const { nodes, onNodesChange } = useNodePositions(viewDef.id, computedNodes);
+  const { nodes, onNodesChange } = useNodePositions<Record<string, unknown>>(viewDef.id, computedNodes);
 
   // ─── 엣지 생성 ──────────────────────────────
 
