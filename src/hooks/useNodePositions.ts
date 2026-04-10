@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { applyNodeChanges, type Node, type NodeChange } from '@xyflow/react';
 
 const STORAGE_PREFIX = 'epulse:node-positions:';
+const RESET_EVENT = 'epulse:reset-node-positions';
 
 type PositionMap = Record<string, { x: number; y: number }>;
 
@@ -27,6 +28,15 @@ function savePositions(key: string, nodes: Node[]): void {
   }
 }
 
+/** 모든 뷰의 저장된 노드 위치를 초기화한다. */
+export function clearAllNodePositions(): void {
+  try {
+    const keys = Object.keys(localStorage).filter((k) => k.startsWith(STORAGE_PREFIX));
+    for (const k of keys) localStorage.removeItem(k);
+  } catch { /* ignore */ }
+  window.dispatchEvent(new Event(RESET_EVENT));
+}
+
 /**
  * ReactFlow 노드의 위치를 localStorage에 저장/복원하고
  * 드래그 이벤트를 처리하는 공유 훅.
@@ -42,10 +52,22 @@ export function useNodePositions<T extends Record<string, unknown>>(
   onNodesChange: (changes: NodeChange[]) => void;
 } {
   const savedRef = useRef<PositionMap>(loadPositions(storageKey));
+  const computedRef = useRef(computedNodes);
+  computedRef.current = computedNodes;
 
   const [nodes, setNodes] = useState<Node<T>[]>(() =>
     applyPositions(computedNodes, savedRef.current),
   );
+
+  // 위치 리셋 이벤트 수신
+  useEffect(() => {
+    const handler = () => {
+      savedRef.current = {};
+      setNodes(computedRef.current);
+    };
+    window.addEventListener(RESET_EVENT, handler);
+    return () => window.removeEventListener(RESET_EVENT, handler);
+  }, []);
 
   useEffect(() => {
     setNodes((prev) => {
