@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useUIStore } from '../../store/uiStore';
 import { useRuleTuningStore } from '../../store/ruleTuningStore';
 import { viewByPath } from '../../domain/views/registry';
@@ -11,12 +11,10 @@ interface HeaderProps {
 
 export function Header({ onToggleLeft, onToggleRight, onToggleRules }: HeaderProps) {
   const location = useLocation();
-  const navigate = useNavigate();
   const colorScheme = useUIStore((s) => s.colorScheme);
   const toggleColorScheme = useUIStore((s) => s.toggleColorScheme);
   const modifiedCount = useRuleTuningStore((s) => Object.keys(s.overrides).length);
 
-  const isSubPage = location.pathname !== '/';
   const pageTitle = viewByPath[location.pathname]?.label;
 
   return (
@@ -31,15 +29,6 @@ export function Header({ onToggleLeft, onToggleRight, onToggleRules }: HeaderPro
         >
           ☰
         </button>
-        {isSubPage && (
-          <button
-            type="button"
-            onClick={() => navigate('/')}
-            className="cursor-pointer text-xs text-slate-400 hover:text-slate-200 transition-colors hidden sm:inline"
-          >
-            ←
-          </button>
-        )}
         <h1 className="text-base font-bold tracking-tight text-slate-100">
           <span className="text-emerald-400">e</span>Pulse
         </h1>
