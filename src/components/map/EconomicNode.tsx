@@ -75,9 +75,31 @@ function EconomicNodeComponent({ data }: NodeProps<EconomicNodeType>) {
     >
       <InvisibleHandles />
 
+      {/* 하위 뷰가 있으면 겹친 카드 레이어 표시 */}
+      {hasDetailView && (
+        <>
+          <div
+            className="absolute left-[5px] top-[5px] w-[160px] rounded-xl"
+            style={{
+              height: 'calc(100% - 2px)',
+              backgroundColor: 'rgba(30,41,59,0.4)',
+              border: `1px solid ${absIntensity >= 1 ? `${glowColor}20` : 'rgba(148,163,184,0.08)'}`,
+            }}
+          />
+          <div
+            className="absolute left-[2.5px] top-[2.5px] w-[160px] rounded-xl"
+            style={{
+              height: 'calc(100% - 1px)',
+              backgroundColor: 'rgba(30,41,59,0.5)',
+              border: `1px solid ${absIntensity >= 1 ? `${glowColor}30` : 'rgba(148,163,184,0.10)'}`,
+            }}
+          />
+        </>
+      )}
+
       <div
         className={`
-          w-[160px] rounded-xl px-3 py-2.5
+          relative w-[160px] rounded-xl px-3 py-2.5
           backdrop-blur-sm
           transition-all duration-300
           ${isSelected ? 'ring-1 ring-white/20' : ''}
@@ -98,14 +120,7 @@ function EconomicNodeComponent({ data }: NodeProps<EconomicNodeType>) {
               <span className="ml-1 text-[9px] text-amber-400/70">●</span>
             )}
           </span>
-          <div className="flex items-center gap-1">
-            {hasDetailView && (
-              <span className="text-[9px] text-slate-500" title="상세 보기">
-                🔍
-              </span>
-            )}
-            <RegionBadge region={region} size="sm" />
-          </div>
+          <RegionBadge region={region} size="sm" />
         </div>
 
         {/* 중단: 상태 + 방향 + 강도 */}
