@@ -12,8 +12,8 @@ import { useMemo } from 'react';
 import { useSimulationStore } from '../store/simulationStore';
 import { rateView } from '../domain/views/rateView';
 import type { DetailViewDef, ViewEdgeDef } from '../domain/views/types';
+import type { NodeState } from '../domain/types';
 import {
-  deltaToDisplayState,
   deltaToIntensity,
   intensityToStrength,
 } from '../domain/simulation/stateMapper';
@@ -49,35 +49,27 @@ export interface TimeSeriesPoint {
 
 export function computeConceptStates(
   viewDef: DetailViewDef,
-  nodeStates: Record<string, { delta: number }>,
+  nodeStates: Record<string, NodeState>,
 ): ConceptState[] {
   return viewDef.conceptNodes.map((concept) => {
-    let aggregatedDelta = 0;
-
-    for (const contrib of concept.contributions) {
-      const sourceState = nodeStates[contrib.sourceId];
-      if (!sourceState) continue;
-      aggregatedDelta += sourceState.delta * contrib.weight;
-    }
-
-    const displayState = concept.labelFn
-      ? concept.labelFn(aggregatedDelta)
-      : deltaToDisplayState(aggregatedDelta);
-
+    const ns = nodeStates[concept.id];
+    const delta = ns?.delta ?? 0;
     return {
       id: concept.id,
       label: concept.label,
       description: concept.description,
-      delta: aggregatedDelta,
-      displayState,
-      intensity: deltaToIntensity(aggregatedDelta),
+      delta,
+      displayState: concept.labelFn
+        ? concept.labelFn(delta)
+        : ns?.displayState ?? '중립',
+      intensity: ns?.intensity ?? 0,
     };
   });
 }
 
 export function computeEdgeStates(
   viewDef: DetailViewDef,
-  nodeStates: Record<string, { delta: number }>,
+  nodeStates: Record<string, NodeState>,
   conceptStateMap: Record<string, ConceptState>,
 ): Record<string, ViewEdgeState> {
   // 동적 깊이 계산: 변화가 있는 입력 노드를 기점(depth 0)으로 BFS
@@ -95,7 +87,7 @@ export function computeEdgeStates(
     for (const edge of viewDef.edges) {
       if (dynamicDepth[edge.source] === undefined) continue;
       const sourceDelta = getSourceDelta(edge, nodeStates, conceptStateMap);
-      if (Math.abs(sourceDelta) < 4) continue;
+      if (Math.abs(sourceDelta) < 1) continue;
       const newDepth = dynamicDepth[edge.source] + 1;
       if (dynamicDepth[edge.target] === undefined || newDepth < dynamicDepth[edge.target]) {
         dynamicDepth[edge.target] = newDepth;
@@ -108,8 +100,9 @@ export function computeEdgeStates(
 
   for (const edge of viewDef.edges) {
     const sourceDelta = getSourceDelta(edge, nodeStates, conceptStateMap);
-    const absDelta = Math.abs(sourceDelta);
-    const active = absDelta >= 4;
+    const targetDelta = getTargetDelta(edge, nodeStates, conceptStateMap);
+    const absSource = Math.abs(sourceDelta);
+    const active = absSource >= 4 || (absSource >= 1 && Math.abs(targetDelta) >= 4);
 
     const effectiveDirection: Direction =
       sourceDelta >= 0
@@ -119,7 +112,7 @@ export function computeEdgeStates(
     states[edge.id] = {
       edgeId: edge.id,
       active,
-      strength: intensityToStrength(deltaToIntensity(sourceDelta)),
+      strength: active ? Math.max(intensityToStrength(deltaToIntensity(sourceDelta)), 0.1) : 0,
       direction: effectiveDirection,
       explanation: edge.explanation,
       order: active ? (dynamicDepth[edge.source] ?? 0) + 1 : 0,
@@ -131,13 +124,24 @@ export function computeEdgeStates(
 
 function getSourceDelta(
   edge: ViewEdgeDef,
-  nodeStates: Record<string, { delta: number }>,
+  nodeStates: Record<string, NodeState>,
   conceptStateMap: Record<string, ConceptState>,
 ): number {
   if (conceptStateMap[edge.source]) {
     return conceptStateMap[edge.source].delta;
   }
   return nodeStates[edge.source]?.delta ?? 0;
+}
+
+function getTargetDelta(
+  edge: ViewEdgeDef,
+  nodeStates: Record<string, NodeState>,
+  conceptStateMap: Record<string, ConceptState>,
+): number {
+  if (conceptStateMap[edge.target]) {
+    return conceptStateMap[edge.target].delta;
+  }
+  return nodeStates[edge.target]?.delta ?? 0;
 }
 
 // ─── 메인 훅 ─────────────────────────────────────────

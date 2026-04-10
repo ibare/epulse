@@ -6,7 +6,7 @@ import { IntensityDots } from '../ui/IntensityDots';
 import { regionColors } from '../../styles/tokens';
 import { useStateColors } from '../../hooks/useStateColors';
 import { deltaToArrow } from '../../utils/formatters';
-import type { Region } from '../../domain/types';
+import type { Region, Layer } from '../../domain/types';
 
 export type EconomicNodeData = Record<string, unknown> & {
   label: string;
@@ -15,7 +15,7 @@ export type EconomicNodeData = Record<string, unknown> & {
   displayState: string;
   intensity: number;
   variableType: 'input' | 'derived';
-  layer: 'cause' | 'transmission' | 'market';
+  layer: Layer;
   isSelected: boolean;
   isConnected: boolean;
   isDimmed: boolean;

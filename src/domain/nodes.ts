@@ -43,6 +43,12 @@ const derivedVariables: EconomicVariable[] = [
 
   // 글로벌 - 시장 레이어
   { id: 'gold', label: '금(안전자산시장)', region: 'GL', type: 'derived', layer: 'market', baseline: 0 },
+
+  // 개념 노드 — 상세 뷰 전용 (거시 뷰에서 필터됨)
+  { id: 'inflation_pressure', label: '인플레이션 압력', region: 'KR', type: 'derived', layer: 'concept', baseline: 0 },
+  { id: 'growth_pressure',    label: '경기 압력',       region: 'KR', type: 'derived', layer: 'concept', baseline: 0 },
+  { id: 'bok_stance',         label: '중앙은행 스탠스', region: 'KR', type: 'derived', layer: 'concept', baseline: 0 },
+  { id: 'market_expectation', label: '시장 기대',       region: 'KR', type: 'derived', layer: 'concept', baseline: 0 },
 ];
 
 export const variables: EconomicVariable[] = [

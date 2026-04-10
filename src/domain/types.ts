@@ -1,6 +1,6 @@
 export type Region = 'KR' | 'US' | 'GL';
 export type VariableType = 'input' | 'derived';
-export type Layer = 'cause' | 'transmission' | 'market';
+export type Layer = 'cause' | 'transmission' | 'market' | 'concept';
 export type Lag = 'immediate' | 'short' | 'medium';
 export type Direction = 'positive' | 'negative';
 

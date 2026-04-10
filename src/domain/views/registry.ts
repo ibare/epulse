@@ -1,11 +1,11 @@
 /**
  * 상세 뷰 등록소
  *
- * 모든 상세 뷰를 등록하고, 거시 뷰 노드 → 상세 뷰 경로 매핑을 제공한다.
- * 새 상세 뷰 추가 시 views 배열에 push만 하면 된다.
+ * 모든 상세 뷰를 등록하고, 거시 뷰 노드 → 상세 뷰 경로 매핑,
+ * 개념 노드 필터, 합성 엣지를 제공한다.
  */
 
-import type { DetailViewDef } from './types';
+import type { DetailViewDef, MacroCollapsedEdge } from './types';
 import { rateView } from './rateView';
 
 const views: DetailViewDef[] = [rateView];
@@ -22,4 +22,18 @@ for (const view of views) {
 export const viewByPath: Record<string, DetailViewDef> = {};
 for (const view of views) {
   viewByPath[view.routePath] = view;
+}
+
+// 모든 뷰의 개념 노드 ID 집합 (거시 뷰 필터용)
+export const conceptNodeIds = new Set<string>();
+for (const view of views) {
+  for (const concept of view.conceptNodes) {
+    conceptNodeIds.add(concept.id);
+  }
+}
+
+// 모든 뷰의 합성 엣지 (거시 뷰에서 개념 노드 축약 표시)
+export const allMacroCollapsedEdges: MacroCollapsedEdge[] = [];
+for (const view of views) {
+  allMacroCollapsedEdges.push(...view.macroCollapsedEdges);
 }

@@ -81,7 +81,7 @@ function buildEdgeStates(
     iter++;
     for (const rule of rules) {
       if (dynamicDepth[rule.source] === undefined) continue;
-      if (Math.abs(allDeltas[rule.source] ?? 0) < 4) continue;
+      if (Math.abs(allDeltas[rule.source] ?? 0) < 1) continue;
       const newDepth = dynamicDepth[rule.source] + 1;
       if (dynamicDepth[rule.target] === undefined || newDepth < dynamicDepth[rule.target]) {
         dynamicDepth[rule.target] = newDepth;
@@ -94,8 +94,9 @@ function buildEdgeStates(
 
   for (const rule of rules) {
     const sourceDelta = allDeltas[rule.source] ?? 0;
-    const absDelta = Math.abs(sourceDelta);
-    const active = absDelta >= 4;
+    const targetDelta = allDeltas[rule.target] ?? 0;
+    const absSource = Math.abs(sourceDelta);
+    const active = absSource >= 4 || (absSource >= 1 && Math.abs(targetDelta) >= 4);
     const effectiveDirection =
       sourceDelta >= 0 ? rule.direction :
       rule.direction === 'positive' ? 'negative' : 'positive';
@@ -103,7 +104,7 @@ function buildEdgeStates(
     states[rule.id] = {
       ruleId: rule.id,
       active,
-      strength: intensityToStrength(deltaToIntensity(sourceDelta)),
+      strength: active ? Math.max(intensityToStrength(deltaToIntensity(sourceDelta)), 0.1) : 0,
       direction: effectiveDirection,
       order: active ? (dynamicDepth[rule.source] ?? 0) + 1 : 0,
     };
@@ -155,6 +156,7 @@ function buildTimeline(
 
     const variable = variableMap[targetId];
     if (!variable) continue;
+    if (variable.layer === 'concept') continue;
 
     const lagPriority: Record<string, number> = {
       immediate: 0,

@@ -1,8 +1,8 @@
 /**
  * 금리 상세 뷰 정의
  *
- * 기존 rateMapping.ts의 데이터를 DetailViewDef 형태로 재구성.
- * 중간 개념 노드, 엣지, 좌표, 특화 라벨 함수를 포함한다.
+ * 개념 노드는 엔진 변수로 승격되어 rules.ts의 rc01-rc13에서 계산된다.
+ * 이 파일은 뷰의 노드 구성, 좌표, 특화 라벨, 합성 엣지를 정의한다.
  */
 
 import type { DetailViewDef } from './types';
@@ -39,10 +39,6 @@ export const rateView: DetailViewDef = {
       id: 'inflation_pressure',
       label: '인플레이션 압력',
       description: '물가 상승과 수입물가(유가) 상승이 만드는 금리 인상 압력',
-      contributions: [
-        { sourceId: 'kr_inflation', weight: 1.0, ruleIds: ['r01', 'r31'] },
-        { sourceId: 'oil', weight: 0.4, ruleIds: ['r18'] },
-      ],
       targets: [
         {
           targetId: 'kr_rate_pressure',
@@ -55,9 +51,6 @@ export const rateView: DetailViewDef = {
       id: 'growth_pressure',
       label: '경기 압력',
       description: '경제성장률이 만드는 금리 방향 압력. 성장이 높으면 긴축, 낮으면 완화 방향.',
-      contributions: [
-        { sourceId: 'kr_growth', weight: 1.0, ruleIds: ['r04'] },
-      ],
       targets: [
         {
           targetId: 'kr_rate_pressure',
@@ -70,11 +63,6 @@ export const rateView: DetailViewDef = {
       id: 'bok_stance',
       label: '중앙은행 스탠스',
       description: '한국은행이 물가·성장·외부 환경을 종합해 결정하는 기준금리 방향',
-      contributions: [
-        { sourceId: 'kr_inflation', weight: 0.4, ruleIds: ['r31'] },
-        { sourceId: 'us_rate', weight: 0.3, ruleIds: ['r30'] },
-        { sourceId: 'kr_growth', weight: 0.15, ruleIds: [] },
-      ],
       targets: [
         {
           targetId: 'kr_rate',
@@ -88,11 +76,6 @@ export const rateView: DetailViewDef = {
       id: 'market_expectation',
       label: '시장 기대',
       description: '시장 참여자들이 미래 금리를 어떻게 예상하는지. 시장금리에 선반영됨.',
-      contributions: [
-        { sourceId: 'kr_inflation', weight: 0.6, ruleIds: ['r01'] },
-        { sourceId: 'kr_growth', weight: 0.3, ruleIds: ['r04'] },
-        { sourceId: 'usdkrw', weight: 0.15, ruleIds: [] },
-      ],
       targets: [
         {
           targetId: 'kr_rate_pressure',
@@ -113,7 +96,7 @@ export const rateView: DetailViewDef = {
       source: 'kr_inflation',
       target: 'inflation_pressure',
       direction: 'positive',
-      ruleIds: ['r01', 'r31'],
+      ruleIds: ['rc01'],
       explanation: '물가 상승은 인플레이션 압력을 높입니다.',
     },
     {
@@ -121,7 +104,7 @@ export const rateView: DetailViewDef = {
       source: 'oil',
       target: 'inflation_pressure',
       direction: 'positive',
-      ruleIds: ['r18'],
+      ruleIds: ['rc02'],
       explanation: '유가 상승은 수입물가를 통해 인플레이션 압력을 높입니다.',
     },
     {
@@ -129,7 +112,7 @@ export const rateView: DetailViewDef = {
       source: 'kr_growth',
       target: 'growth_pressure',
       direction: 'positive',
-      ruleIds: ['r04'],
+      ruleIds: ['rc03'],
       explanation: '경제성장률 상승은 경기 과열 압력을 높입니다.',
     },
     {
@@ -137,7 +120,7 @@ export const rateView: DetailViewDef = {
       source: 'kr_inflation',
       target: 'bok_stance',
       direction: 'positive',
-      ruleIds: ['r31'],
+      ruleIds: ['rc04'],
       explanation: '물가 상승은 중앙은행의 긴축 성향을 강화합니다.',
     },
     {
@@ -145,7 +128,7 @@ export const rateView: DetailViewDef = {
       source: 'us_rate',
       target: 'bok_stance',
       direction: 'positive',
-      ruleIds: ['r30'],
+      ruleIds: ['rc05'],
       explanation: '미국 금리 인상은 한국 금리 인상 압력으로 파급됩니다.',
     },
     {
@@ -153,7 +136,7 @@ export const rateView: DetailViewDef = {
       source: 'kr_inflation',
       target: 'market_expectation',
       direction: 'positive',
-      ruleIds: ['r01'],
+      ruleIds: ['rc07'],
       explanation: '물가 상승은 시장의 금리 인상 기대를 강화합니다.',
     },
     {
@@ -161,7 +144,7 @@ export const rateView: DetailViewDef = {
       source: 'kr_growth',
       target: 'market_expectation',
       direction: 'positive',
-      ruleIds: ['r04'],
+      ruleIds: ['rc08'],
       explanation: '경기 과열은 시장의 금리 인상 기대를 높입니다.',
     },
     {
@@ -169,7 +152,7 @@ export const rateView: DetailViewDef = {
       source: 'usdkrw',
       target: 'market_expectation',
       direction: 'positive',
-      ruleIds: [],
+      ruleIds: ['rc09'],
       explanation: '환율 불안은 시장의 금리 인상 기대를 자극합니다.',
     },
     // 2열 → 3열: 개념 → 결과
@@ -178,7 +161,7 @@ export const rateView: DetailViewDef = {
       source: 'bok_stance',
       target: 'kr_rate',
       direction: 'positive',
-      ruleIds: ['r30', 'r31'],
+      ruleIds: ['rc10'],
       explanation: '중앙은행의 긴축 스탠스는 기준금리 인상으로 이어집니다.',
     },
     {
@@ -186,7 +169,7 @@ export const rateView: DetailViewDef = {
       source: 'market_expectation',
       target: 'kr_rate_pressure',
       direction: 'positive',
-      ruleIds: ['r01', 'r04'],
+      ruleIds: ['rc13'],
       explanation: '시장의 금리 인상 기대는 시장금리를 먼저 끌어올립니다.',
     },
     {
@@ -194,7 +177,7 @@ export const rateView: DetailViewDef = {
       source: 'inflation_pressure',
       target: 'kr_rate_pressure',
       direction: 'positive',
-      ruleIds: ['r01'],
+      ruleIds: ['rc11'],
       explanation: '인플레이션 압력은 시장금리 상승으로 이어집니다.',
     },
     {
@@ -202,7 +185,7 @@ export const rateView: DetailViewDef = {
       source: 'growth_pressure',
       target: 'kr_rate_pressure',
       direction: 'positive',
-      ruleIds: ['r04'],
+      ruleIds: ['rc12'],
       explanation: '경기 압력은 시장금리 상승 압력을 만듭니다.',
     },
   ],
@@ -225,6 +208,18 @@ export const rateView: DetailViewDef = {
   },
 
   entryNodeIds: ['kr_rate', 'kr_rate_pressure'],
+
+  macroCollapsedEdges: [
+    // 기존 직접 규칙 대체
+    { id: 'mc01', source: 'kr_inflation', target: 'kr_rate_pressure', direction: 'positive', lag: 'immediate', explanation: '물가 상승은 시장금리 인상 압력으로 이어질 수 있습니다.' },
+    { id: 'mc02', source: 'kr_growth', target: 'kr_rate_pressure', direction: 'positive', lag: 'short', explanation: '경제성장률 상승은 시장금리 인상 압력을 높일 수 있습니다.' },
+    { id: 'mc03', source: 'us_rate', target: 'kr_rate', direction: 'positive', lag: 'short', explanation: '미국 금리 인상은 한국 기준금리 인상 압력으로 파급됩니다.' },
+    { id: 'mc04', source: 'kr_inflation', target: 'kr_rate', direction: 'positive', lag: 'short', explanation: '물가 상승은 기준금리 인상 압력으로 이어질 수 있습니다.' },
+    // 신규 약한 경로
+    { id: 'mc05', source: 'oil', target: 'kr_rate_pressure', direction: 'positive', lag: 'short', explanation: '유가 상승은 인플레이션 압력을 통해 시장금리에 상승 압력을 줍니다.' },
+    { id: 'mc06', source: 'kr_growth', target: 'kr_rate', direction: 'positive', lag: 'short', explanation: '경기 과열은 중앙은행 긴축 스탠스를 통해 기준금리 인상 압력을 높입니다.' },
+    { id: 'mc07', source: 'usdkrw', target: 'kr_rate_pressure', direction: 'positive', lag: 'short', explanation: '환율 불안은 금리 인상 기대를 자극하여 시장금리에 상승 압력을 줍니다.' },
+  ],
 };
 
 // ─── 편의 파생값 ────────────────────────────────────

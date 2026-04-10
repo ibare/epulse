@@ -5,15 +5,9 @@
  * 상세 뷰의 노드/엣지 구성을 정의하는 범용 타입.
  */
 
-import type { Direction } from '../types';
+import type { Direction, Lag } from '../types';
 
 // ─── 개념 노드 정의 ─────────────────────────────────
-
-export interface ConceptContribution {
-  sourceId: string;
-  weight: number;
-  ruleIds: string[];
-}
 
 export interface ConceptTarget {
   targetId: string;
@@ -25,7 +19,6 @@ export interface ConceptNodeDef {
   id: string;
   label: string;
   description: string;
-  contributions: ConceptContribution[];
   targets: ConceptTarget[];
   labelFn?: (delta: number) => string;
 }
@@ -41,6 +34,17 @@ export interface ViewEdgeDef {
   explanation: string;
 }
 
+// ─── 거시 뷰 합성 엣지 ─────────────────────────────
+
+export interface MacroCollapsedEdge {
+  id: string;
+  source: string;
+  target: string;
+  direction: Direction;
+  lag: Lag;
+  explanation: string;
+}
+
 // ─── 상세 뷰 정의 ──────────────────────────────────
 
 export interface DetailViewDef {
@@ -53,4 +57,5 @@ export interface DetailViewDef {
   edges: ViewEdgeDef[];
   positions: Record<string, { x: number; y: number }>;
   entryNodeIds: string[];
+  macroCollapsedEdges: MacroCollapsedEdge[];
 }

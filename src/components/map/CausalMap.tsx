@@ -15,7 +15,12 @@ import { useNodeInteraction } from '../../hooks/useNodeInteraction';
 import { variables, nodePositions } from '../../domain/nodes';
 import { rules } from '../../domain/rules';
 
-import { entryNodeToPath } from '../../domain/views/registry';
+import { entryNodeToPath, conceptNodeIds, allMacroCollapsedEdges } from '../../domain/views/registry';
+import { deltaToIntensity, intensityToStrength } from '../../domain/simulation/stateMapper';
+
+// 거시 뷰: 개념 노드 및 개념 노드 관련 규칙 필터
+const macroVariables = variables.filter((v) => v.layer !== 'concept');
+const macroRules = rules.filter((r) => !conceptNodeIds.has(r.source) && !conceptNodeIds.has(r.target));
 
 const nodeTypes = { economic: EconomicNode };
 const edgeTypes = { causal: CausalEdge };
@@ -30,7 +35,7 @@ export function CausalMap() {
   const hasActiveNode = activeNodeId !== null;
 
   const nodes = useMemo<Node<EconomicNodeData, 'economic'>[]>(() => {
-    return variables.map((v) => {
+    return macroVariables.map((v) => {
       const nodeState = result.nodeStates[v.id];
       const pos = nodePositions[v.id] ?? { x: 0, y: 0 };
       const isSelected = activeNodeId === v.id;
@@ -61,11 +66,10 @@ export function CausalMap() {
   }, [result.nodeStates, activeNodeId, hasActiveNode, connectedNodeIds, pinnedInputs]);
 
   const edges = useMemo<Edge<CausalEdgeData>[]>(() => {
-    return rules.map((rule) => {
+    // 실제 엔진 규칙 (개념 노드 제외)
+    const ruleEdges: Edge<CausalEdgeData>[] = macroRules.map((rule) => {
       const edgeState = result.edgeStates[rule.id];
       const isDimmed = hasActiveNode && !connectedEdgeIds.has(rule.id);
-      const active = edgeState?.active ?? false;
-      const direction = edgeState?.direction ?? rule.direction;
 
       return {
         id: rule.id,
@@ -73,9 +77,9 @@ export function CausalMap() {
         target: rule.target,
         type: 'causal' as const,
         data: {
-          active,
+          active: edgeState?.active ?? false,
           strength: edgeState?.strength ?? 0,
-          direction,
+          direction: edgeState?.direction ?? rule.direction,
           explanation: rule.explanation,
           isDimmed,
           lag: rule.lag,
@@ -83,7 +87,39 @@ export function CausalMap() {
         },
       };
     });
-  }, [result.edgeStates, hasActiveNode, connectedEdgeIds]);
+
+    // 합성 엣지 (개념 노드 경유 경로를 축약)
+    const collapsedEdges: Edge<CausalEdgeData>[] = allMacroCollapsedEdges.map((edge) => {
+      const sourceDelta = result.nodeStates[edge.source]?.delta ?? 0;
+      const targetDelta = result.nodeStates[edge.target]?.delta ?? 0;
+      const absSource = Math.abs(sourceDelta);
+      const active = absSource >= 4 || (absSource >= 1 && Math.abs(targetDelta) >= 4);
+      const effectiveDirection = sourceDelta >= 0
+        ? edge.direction
+        : edge.direction === 'positive' ? 'negative' : 'positive';
+      const isDimmed = hasActiveNode
+        && !connectedNodeIds.has(edge.source)
+        && !connectedNodeIds.has(edge.target);
+
+      return {
+        id: edge.id,
+        source: edge.source,
+        target: edge.target,
+        type: 'causal' as const,
+        data: {
+          active,
+          strength: active ? Math.max(intensityToStrength(deltaToIntensity(sourceDelta)), 0.1) : 0,
+          direction: effectiveDirection,
+          explanation: edge.explanation,
+          isDimmed,
+          lag: edge.lag,
+          order: 0,
+        },
+      };
+    });
+
+    return [...ruleEdges, ...collapsedEdges];
+  }, [result.edgeStates, result.nodeStates, hasActiveNode, connectedEdgeIds, connectedNodeIds]);
 
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: Node) => {
