@@ -26,7 +26,7 @@ const derivedVariables: EconomicVariable[] = [
   { id: 'kr_rate_pressure', label: '시장금리', region: 'KR', type: 'derived', layer: 'transmission', baseline: 0 },
 
   // 글로벌 - 매개 레이어
-  { id: 'usd_strength', label: '달러 강세 지수', region: 'GL', type: 'derived', layer: 'transmission', baseline: 0 },
+  { id: 'usd_strength', label: '달러 지수', region: 'GL', type: 'derived', layer: 'market', baseline: 0 },
 
   // 한국 - 매개 레이어
   { id: 'usdkrw_pressure', label: '시장환율 기대', region: 'KR', type: 'derived', layer: 'transmission', baseline: 0 },
@@ -79,9 +79,6 @@ export const nodePositions: Record<string, { x: number; y: number }> = {
   // 매개 레이어 — US
   us_rate:       { x: 350, y: 440 },
 
-  // 매개 레이어 — GL
-  usd_strength:  { x: 350, y: 560 },
-
   // 시장 레이어 (x=700) — KR
   kr_bond:       { x: 700, y: 0 },
   kr_stock:      { x: 700, y: 100 },
@@ -93,5 +90,6 @@ export const nodePositions: Record<string, { x: number; y: number }> = {
   us_stock:      { x: 700, y: 540 },
 
   // 시장 레이어 — GL
-  gold:          { x: 700, y: 640 },
+  usd_strength:  { x: 700, y: 640 },
+  gold:          { x: 700, y: 740 },
 };
