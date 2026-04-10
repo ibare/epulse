@@ -71,6 +71,15 @@ export function useMacroViewData(
       };
     });
 
+    // 합성 엣지의 order 계산을 위해 source별 최대 order를 미리 집계
+    const maxOrderBySource: Record<string, number> = {};
+    for (const rule of macroRules) {
+      const o = result.edgeStates[rule.id]?.order ?? 0;
+      if (o > (maxOrderBySource[rule.source] ?? 0)) {
+        maxOrderBySource[rule.source] = o;
+      }
+    }
+
     const collapsedEdges: Edge<CausalEdgeData>[] = allMacroCollapsedEdges.map((edge) => {
       const sourceDelta = result.nodeStates[edge.source]?.delta ?? 0;
       const targetDelta = result.nodeStates[edge.target]?.delta ?? 0;
@@ -82,6 +91,9 @@ export function useMacroViewData(
       const isDimmed = hasActiveNode
         && !connectedNodeIds.has(edge.source)
         && !connectedNodeIds.has(edge.target);
+
+      // 합성 엣지는 개념 노드를 경유하므로 같은 source의 일반 엣지보다 1단계 뒤
+      const baseOrder = maxOrderBySource[edge.source] ?? 0;
 
       return {
         id: edge.id,
@@ -95,7 +107,7 @@ export function useMacroViewData(
           explanation: edge.explanation,
           isDimmed,
           lag: edge.lag,
-          order: 0,
+          order: active ? baseOrder + 1 : 0,
         },
       };
     });
