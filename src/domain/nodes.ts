@@ -49,6 +49,17 @@ const derivedVariables: EconomicVariable[] = [
   { id: 'growth_pressure',    label: '경기 압력',       region: 'KR', type: 'derived', layer: 'concept', baseline: 0 },
   { id: 'bok_stance',         label: '중앙은행 스탠스', region: 'KR', type: 'derived', layer: 'concept', baseline: 0 },
   { id: 'market_expectation', label: '시장 기대',       region: 'KR', type: 'derived', layer: 'concept', baseline: 0 },
+
+  // 한국 주식 개념 노드
+  { id: 'earnings_outlook_kr', label: '기업 실적 기대', region: 'KR', type: 'derived', layer: 'concept', baseline: 0 },
+  { id: 'discount_burden_kr',  label: '할인율 부담',    region: 'KR', type: 'derived', layer: 'concept', baseline: 0 },
+  { id: 'foreign_demand_kr',   label: '외국인 수급',    region: 'KR', type: 'derived', layer: 'concept', baseline: 0 },
+  { id: 'sentiment_kr',        label: '투자 심리',      region: 'KR', type: 'derived', layer: 'concept', baseline: 0 },
+
+  // 미국 주식 개념 노드
+  { id: 'earnings_outlook_us', label: '기업 실적 기대', region: 'US', type: 'derived', layer: 'concept', baseline: 0 },
+  { id: 'discount_burden_us',  label: '할인율 부담',    region: 'US', type: 'derived', layer: 'concept', baseline: 0 },
+  { id: 'sentiment_us',        label: '투자 심리',      region: 'US', type: 'derived', layer: 'concept', baseline: 0 },
 ];
 
 export const variables: EconomicVariable[] = [
