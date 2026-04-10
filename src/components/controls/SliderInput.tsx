@@ -4,6 +4,7 @@ import { regionColors } from '../../styles/tokens';
 import { useStateColors } from '../../hooks/useStateColors';
 import { WarningBubble } from './WarningBubble';
 import { trackEvent } from '../../utils/analytics';
+import { formatDisplayValue, formatDisplayDelta } from '../../utils/displayScales';
 
 interface SliderInputProps {
   variableId: string;
@@ -84,20 +85,20 @@ export function SliderInput({
           <span className="text-xs text-slate-300 truncate">{label}</span>
         </div>
         <div className="flex items-center gap-1 shrink-0">
-          <span className="text-xs font-mono text-slate-300">{value}</span>
+          <span className="text-xs font-mono text-slate-300">{formatDisplayValue(variableId, value)}</span>
           {displayDelta !== 0 && (
             <span
               className="text-[10px] font-mono"
               style={{ color: deltaColorValue }}
             >
-              {displayDelta > 0 ? '+' : ''}{Math.round(displayDelta)}
+              {formatDisplayDelta(variableId, displayDelta)}
             </span>
           )}
           {hasRulePressure && (
             <span
               className="text-[9px] font-mono"
               style={{ color: pressureGlowColor }}
-              title={`무시 중인 압력 ${rulePressure > 0 ? '+' : ''}${Math.round(rulePressure)}`}
+              title={`무시 중인 압력 ${formatDisplayDelta(variableId, rulePressure)}`}
             >
               {rulePressure > 0 ? '▲' : '▼'}
             </span>
