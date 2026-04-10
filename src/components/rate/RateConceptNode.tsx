@@ -81,13 +81,10 @@ function RateConceptNodeComponent({ data }: NodeProps<RateConceptNodeType>) {
         }}
         aria-label={`${label}: ${displayState}`}
       >
-        {/* 상단: 라벨 + 개념 태그 */}
-        <div className="mb-1.5 flex items-start justify-between gap-1">
+        {/* 상단: 라벨 */}
+        <div className="mb-1.5">
           <span className="text-xs font-semibold leading-tight text-slate-200">
             {label}
-          </span>
-          <span className="shrink-0 rounded-full bg-slate-700/60 px-1.5 py-0.5 text-[9px] font-medium text-slate-400">
-            개념
           </span>
         </div>
 

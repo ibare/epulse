@@ -77,9 +77,6 @@ export function RateExplainPanel({ selectedNodeId }: RateExplainPanelProps) {
             <h3 className="text-sm font-semibold text-slate-200">
               {selectedConcept.label}
             </h3>
-            <span className="rounded-full bg-slate-700/60 px-1.5 py-0.5 text-[9px] font-medium text-slate-400">
-              개념
-            </span>
           </div>
           <p className="mb-3 text-xs leading-relaxed text-slate-400">
             {selectedConcept.description}
