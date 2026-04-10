@@ -8,6 +8,7 @@ import { rules } from '../domain/rules';
 import { entryNodeToPath, conceptNodeIds, allMacroCollapsedEdges } from '../domain/views/registry';
 import { deltaToIntensity, intensityToStrength } from '../domain/simulation/stateMapper';
 import { INTENSITY_THRESHOLD, EDGE_SIGNAL_THRESHOLD } from '../domain/simulation/config';
+import { computeNodeHighlight } from '../utils/graphConnections';
 
 const macroVariables = variables.filter((v) => v.layer !== 'concept');
 const macroRules = rules.filter((r) => !conceptNodeIds.has(r.source) && !conceptNodeIds.has(r.target));
@@ -25,9 +26,7 @@ export function useMacroViewData(
     return macroVariables.map((v) => {
       const nodeState = result.nodeStates[v.id];
       const pos = nodePositions[v.id] ?? { x: 0, y: 0 };
-      const isSelected = activeNodeId === v.id;
-      const isConnected = hasActiveNode && connectedNodeIds.has(v.id);
-      const isDimmed = hasActiveNode && !isConnected;
+      const highlight = computeNodeHighlight(v.id, activeNodeId, connectedNodeIds);
 
       return {
         id: v.id,
@@ -42,9 +41,7 @@ export function useMacroViewData(
           intensity: nodeState?.intensity ?? 0,
           variableType: v.type,
           layer: v.layer,
-          isSelected,
-          isConnected,
-          isDimmed,
+          ...highlight,
           isPinned: pinnedInputs.has(v.id),
           hasDetailView: v.id in entryNodeToPath,
         },

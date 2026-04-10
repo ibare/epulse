@@ -1,6 +1,6 @@
 import { memo } from 'react';
-import { Handle, Position } from '@xyflow/react';
 import type { NodeProps, Node } from '@xyflow/react';
+import { InvisibleHandles } from '../flow/InvisibleHandles';
 import { RegionBadge } from '../ui/RegionBadge';
 import { IntensityDots } from '../ui/IntensityDots';
 import { regionColors } from '../../styles/tokens';
@@ -73,15 +73,7 @@ function EconomicNodeComponent({ data }: NodeProps<EconomicNodeType>) {
       className="relative transition-all duration-300"
       style={{ opacity }}
     >
-      {/* 연결 핸들 — 4방향, source+target 겸용 */}
-      <Handle type="target" id="top"    position={Position.Top}    className="!w-0 !h-0 !border-0 !bg-transparent" />
-      <Handle type="target" id="right"  position={Position.Right}  className="!w-0 !h-0 !border-0 !bg-transparent" />
-      <Handle type="target" id="bottom" position={Position.Bottom} className="!w-0 !h-0 !border-0 !bg-transparent" />
-      <Handle type="target" id="left"   position={Position.Left}   className="!w-0 !h-0 !border-0 !bg-transparent" />
-      <Handle type="source" id="top"    position={Position.Top}    className="!w-0 !h-0 !border-0 !bg-transparent" />
-      <Handle type="source" id="right"  position={Position.Right}  className="!w-0 !h-0 !border-0 !bg-transparent" />
-      <Handle type="source" id="bottom" position={Position.Bottom} className="!w-0 !h-0 !border-0 !bg-transparent" />
-      <Handle type="source" id="left"   position={Position.Left}   className="!w-0 !h-0 !border-0 !bg-transparent" />
+      <InvisibleHandles />
 
       <div
         className={`

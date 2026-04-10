@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useUIStore } from '../store/uiStore';
 import { rules } from '../domain/rules';
+import { computeConnections } from '../utils/graphConnections';
 
 export function useNodeInteraction() {
   const selectedNodeId = useUIStore((s) => s.selectedNodeId);
@@ -10,27 +11,18 @@ export function useNodeInteraction() {
 
   const activeNodeId = hoveredNodeId ?? selectedNodeId;
 
+  const { connectedEdgeIds, connectedNodeIds } = useMemo(
+    () => computeConnections(activeNodeId, rules),
+    [activeNodeId],
+  );
+
+  // NodeDetailPanel에서 규칙 목록 표시에 사용
   const connectedRules = useMemo(() => {
     if (!activeNodeId) return [];
     return rules.filter(
       (r) => r.source === activeNodeId || r.target === activeNodeId,
     );
   }, [activeNodeId]);
-
-  const connectedEdgeIds = useMemo(() => {
-    return new Set(connectedRules.map((r) => r.id));
-  }, [connectedRules]);
-
-  const connectedNodeIds = useMemo(() => {
-    if (!activeNodeId) return new Set<string>();
-    const ids = new Set<string>();
-    ids.add(activeNodeId);
-    for (const r of connectedRules) {
-      ids.add(r.source);
-      ids.add(r.target);
-    }
-    return ids;
-  }, [activeNodeId, connectedRules]);
 
   return {
     selectedNodeId,

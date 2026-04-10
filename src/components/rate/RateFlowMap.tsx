@@ -7,21 +7,16 @@
  */
 
 import { useMemo, useCallback } from 'react';
-import {
-  ReactFlow,
-  Background,
-  BackgroundVariant,
-  type Node,
-  type Edge,
-} from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
+import type { Node, Edge } from '@xyflow/react';
 
 import { EconomicNode, type EconomicNodeData } from '../map/EconomicNode';
 import { RateConceptNode, type RateConceptNodeData } from './RateConceptNode';
 import { CausalEdge, type CausalEdgeData } from '../map/CausalEdge';
+import { FlowCanvas } from '../flow/FlowCanvas';
 import { useSimulationStore } from '../../store/simulationStore';
 import { useRateSimulation } from '../../hooks/useRateSimulation';
 import { useNodePositions } from '../../hooks/useNodePositions';
+import { computeConnections, computeNodeHighlight } from '../../utils/graphConnections';
 import { variableMap } from '../../domain/nodes';
 import { rateView } from '../../domain/views/rateView';
 
@@ -50,23 +45,10 @@ export function RateFlowMap({
 
   const activeNodeId = hoveredNodeId ?? selectedNodeId;
 
-  // 활성 노드에 연결된 엣지/노드 집합
-  const { connectedEdgeIds, connectedNodeIds } = useMemo(() => {
-    if (!activeNodeId) return { connectedEdgeIds: new Set<string>(), connectedNodeIds: new Set<string>() };
-
-    const edgeIds = new Set<string>();
-    const nodeIds = new Set<string>([activeNodeId]);
-
-    for (const edge of rateView.edges) {
-      if (edge.source === activeNodeId || edge.target === activeNodeId) {
-        edgeIds.add(edge.id);
-        nodeIds.add(edge.source);
-        nodeIds.add(edge.target);
-      }
-    }
-
-    return { connectedEdgeIds: edgeIds, connectedNodeIds: nodeIds };
-  }, [activeNodeId]);
+  const { connectedEdgeIds, connectedNodeIds } = useMemo(
+    () => computeConnections(activeNodeId, rateView.edges),
+    [activeNodeId],
+  );
 
   const hasActiveNode = activeNodeId !== null;
 
@@ -81,8 +63,7 @@ export function RateFlowMap({
       if (!v) continue;
       const ns = result.nodeStates[id];
       const pos = rateView.positions[id];
-      const isSelected = activeNodeId === id;
-      const isConnected = hasActiveNode && connectedNodeIds.has(id);
+      const highlight = computeNodeHighlight(id, activeNodeId, connectedNodeIds);
 
       result_.push({
         id,
@@ -97,9 +78,7 @@ export function RateFlowMap({
           intensity: ns?.intensity ?? 0,
           variableType: 'input',
           layer: 'cause',
-          isSelected,
-          isConnected,
-          isDimmed: hasActiveNode && !isConnected,
+          ...highlight,
           isPinned: pinnedInputs.has(id),
         },
       });
@@ -108,8 +87,7 @@ export function RateFlowMap({
     // 2열: 중간 개념 노드
     for (const cs of conceptStates) {
       const pos = rateView.positions[cs.id];
-      const isSelected = activeNodeId === cs.id;
-      const isConnected = hasActiveNode && connectedNodeIds.has(cs.id);
+      const highlight = computeNodeHighlight(cs.id, activeNodeId, connectedNodeIds);
 
       result_.push({
         id: cs.id,
@@ -122,9 +100,7 @@ export function RateFlowMap({
           delta: cs.delta,
           displayState: cs.displayState,
           intensity: cs.intensity,
-          isSelected,
-          isConnected,
-          isDimmed: hasActiveNode && !isConnected,
+          ...highlight,
         },
       });
     }
@@ -135,8 +111,7 @@ export function RateFlowMap({
       if (!v) continue;
       const ns = result.nodeStates[id];
       const pos = rateView.positions[id];
-      const isSelected = activeNodeId === id;
-      const isConnected = hasActiveNode && connectedNodeIds.has(id);
+      const highlight = computeNodeHighlight(id, activeNodeId, connectedNodeIds);
 
       result_.push({
         id,
@@ -151,16 +126,14 @@ export function RateFlowMap({
           intensity: ns?.intensity ?? 0,
           variableType: 'derived',
           layer: 'market',
-          isSelected,
-          isConnected,
-          isDimmed: hasActiveNode && !isConnected,
+          ...highlight,
           isPinned: false,
         },
       });
     }
 
     return result_;
-  }, [result.nodeStates, pinnedInputs, conceptStates, activeNodeId, hasActiveNode, connectedNodeIds]);
+  }, [result.nodeStates, pinnedInputs, conceptStates, activeNodeId, connectedNodeIds]);
 
   const { nodes, onNodesChange } = useNodePositions('rate', computedNodes);
 
@@ -214,33 +187,17 @@ export function RateFlowMap({
   );
 
   return (
-    <div className="h-full w-full">
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        nodeTypes={nodeTypes}
-        edgeTypes={edgeTypes}
-        onNodesChange={onNodesChange}
-        onNodeClick={onNodeClick}
-        onNodeMouseEnter={onNodeMouseEnter}
-        onNodeMouseLeave={onNodeMouseLeave}
-        onPaneClick={onPaneClick}
-        fitView
-        fitViewOptions={{ padding: 0.2 }}
-        minZoom={0.3}
-        maxZoom={1.5}
-        nodesDraggable={true}
-        nodesConnectable={false}
-        elementsSelectable={false}
-        proOptions={{ hideAttribution: true }}
-      >
-        <Background
-          variant={BackgroundVariant.Dots}
-          gap={20}
-          size={1}
-          color="rgba(148,163,184,0.08)"
-        />
-      </ReactFlow>
-    </div>
+    <FlowCanvas
+      nodes={nodes}
+      edges={edges}
+      nodeTypes={nodeTypes}
+      edgeTypes={edgeTypes}
+      onNodesChange={onNodesChange}
+      onNodeClick={onNodeClick}
+      onNodeMouseEnter={onNodeMouseEnter}
+      onNodeMouseLeave={onNodeMouseLeave}
+      onPaneClick={onPaneClick}
+      fitViewPadding={0.2}
+    />
   );
 }
