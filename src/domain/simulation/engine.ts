@@ -65,9 +65,31 @@ function buildNodeStates(
 
 function buildEdgeStates(
   allDeltas: Record<string, number>,
-  propagationDepths: Record<string, number>,
+  inputDeltas: Record<string, number>,
   rules: CausalRule[],
 ): Record<string, EdgeState> {
+  // 실제 변경된 input을 기점(depth 0)으로 동적 순서 계산
+  const dynamicDepth: Record<string, number> = {};
+  for (const [id, delta] of Object.entries(inputDeltas)) {
+    if (Math.abs(delta) >= 1) dynamicDepth[id] = 0;
+  }
+
+  let changed = true;
+  let iter = 0;
+  while (changed && iter < 30) {
+    changed = false;
+    iter++;
+    for (const rule of rules) {
+      if (dynamicDepth[rule.source] === undefined) continue;
+      if (Math.abs(allDeltas[rule.source] ?? 0) < 4) continue;
+      const newDepth = dynamicDepth[rule.source] + 1;
+      if (dynamicDepth[rule.target] === undefined || newDepth < dynamicDepth[rule.target]) {
+        dynamicDepth[rule.target] = newDepth;
+        changed = true;
+      }
+    }
+  }
+
   const states: Record<string, EdgeState> = {};
 
   for (const rule of rules) {
@@ -83,7 +105,7 @@ function buildEdgeStates(
       active,
       strength: intensityToStrength(deltaToIntensity(sourceDelta)),
       direction: effectiveDirection,
-      order: active ? (propagationDepths[rule.source] ?? 0) + 1 : 0,
+      order: active ? (dynamicDepth[rule.source] ?? 0) + 1 : 0,
     };
   }
 
@@ -244,7 +266,7 @@ export function runSimulation(
   const allDeltas = propagate(inputDeltas, rules, depths);
 
   const nodeStates = buildNodeStates(inputValues, allDeltas);
-  const edgeStates = buildEdgeStates(allDeltas, depths, rules);
+  const edgeStates = buildEdgeStates(allDeltas, inputDeltas, rules);
   const timeline = buildTimeline(allDeltas, rules);
   const exceptions = collectExceptions(allDeltas, rules);
   const summary = generateSummary(allDeltas, inputDeltas);
@@ -279,7 +301,7 @@ export function runSimulationWithPins(
 
   const nodeStates = buildNodeStates(inputValues, allDeltas);
   // 엣지 상태는 전체 규칙으로 평가 (필터링된 규칙이라도 시각적으로 표시)
-  const edgeStates = buildEdgeStates(allDeltas, depths, rules);
+  const edgeStates = buildEdgeStates(allDeltas, inputDeltas, rules);
   // 타임라인도 전체 규칙으로 설명 텍스트 생성
   const timeline = buildTimeline(allDeltas, rules);
   const exceptions = collectExceptions(allDeltas, rules);
