@@ -1,5 +1,7 @@
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useSimulationStore } from '../../store/simulationStore';
 import { useRuleTuningStore } from '../../store/ruleTuningStore';
+import { viewByPath } from '../../domain/views/registry';
 
 interface HeaderProps {
   onToggleLeft?: () => void;
@@ -8,9 +10,14 @@ interface HeaderProps {
 }
 
 export function Header({ onToggleLeft, onToggleRight, onToggleRules }: HeaderProps) {
+  const location = useLocation();
+  const navigate = useNavigate();
   const colorScheme = useSimulationStore((s) => s.colorScheme);
   const toggleColorScheme = useSimulationStore((s) => s.toggleColorScheme);
   const modifiedCount = useRuleTuningStore((s) => Object.keys(s.overrides).length);
+
+  const isSubPage = location.pathname !== '/';
+  const pageTitle = viewByPath[location.pathname]?.label;
 
   return (
     <header className="flex h-12 shrink-0 items-center justify-between border-b border-slate-800/50 px-4">
@@ -24,12 +31,27 @@ export function Header({ onToggleLeft, onToggleRight, onToggleRules }: HeaderPro
         >
           ☰
         </button>
+        {isSubPage && (
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="cursor-pointer text-xs text-slate-400 hover:text-slate-200 transition-colors hidden sm:inline"
+          >
+            ←
+          </button>
+        )}
         <h1 className="text-base font-bold tracking-tight text-slate-100">
           <span className="text-emerald-400">e</span>Pulse
         </h1>
-        <span className="hidden text-xs text-slate-500 sm:inline">
-          경제 인과관계 학습 시뮬레이터
-        </span>
+        {pageTitle ? (
+          <span className="hidden text-xs text-slate-500 sm:inline">
+            › {pageTitle}
+          </span>
+        ) : (
+          <span className="hidden text-xs text-slate-500 sm:inline">
+            경제 인과관계 학습 시뮬레이터
+          </span>
+        )}
       </div>
       <div className="flex items-center gap-3">
         <span className="hidden text-[10px] text-slate-600 sm:inline">

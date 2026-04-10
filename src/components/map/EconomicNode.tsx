@@ -20,6 +20,7 @@ export type EconomicNodeData = Record<string, unknown> & {
   isConnected: boolean;
   isDimmed: boolean;
   isPinned: boolean;
+  hasDetailView?: boolean;
 };
 
 type EconomicNodeType = Node<EconomicNodeData, 'economic'>;
@@ -35,6 +36,7 @@ function EconomicNodeComponent({ data }: NodeProps<EconomicNodeType>) {
     isSelected,
     isDimmed,
     isPinned,
+    hasDetailView,
   } = data;
 
   const stateColors = useStateColors();
@@ -111,7 +113,14 @@ function EconomicNodeComponent({ data }: NodeProps<EconomicNodeType>) {
               <span className="ml-1 text-[9px] text-amber-400/70">●</span>
             )}
           </span>
-          <RegionBadge region={region} size="sm" />
+          <div className="flex items-center gap-1">
+            {hasDetailView && (
+              <span className="text-[9px] text-slate-500" title="상세 보기">
+                🔍
+              </span>
+            )}
+            <RegionBadge region={region} size="sm" />
+          </div>
         </div>
 
         {/* 중단: 상태 + 방향 + 강도 */}

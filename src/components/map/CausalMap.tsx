@@ -1,4 +1,5 @@
 import { useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ReactFlow,
   Background,
@@ -14,10 +15,13 @@ import { useNodeInteraction } from '../../hooks/useNodeInteraction';
 import { variables, nodePositions } from '../../domain/nodes';
 import { rules } from '../../domain/rules';
 
+import { entryNodeToPath } from '../../domain/views/registry';
+
 const nodeTypes = { economic: EconomicNode };
 const edgeTypes = { causal: CausalEdge };
 
 export function CausalMap() {
+  const navigate = useNavigate();
   const result = useSimulationStore((s) => s.result);
   const pinnedInputs = useSimulationStore((s) => s.pinnedInputs);
   const { activeNodeId, connectedEdgeIds, connectedNodeIds, selectNode, hoverNode } =
@@ -50,6 +54,7 @@ export function CausalMap() {
           isConnected,
           isDimmed,
           isPinned: pinnedInputs.has(v.id),
+          hasDetailView: v.id in entryNodeToPath,
         },
       };
     });
@@ -82,9 +87,14 @@ export function CausalMap() {
 
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: Node) => {
+      const detailPath = entryNodeToPath[node.id];
+      if (detailPath) {
+        navigate(detailPath);
+        return;
+      }
       selectNode(activeNodeId === node.id ? null : node.id);
     },
-    [activeNodeId, selectNode],
+    [activeNodeId, selectNode, navigate],
   );
 
   const onNodeMouseEnter = useCallback(
