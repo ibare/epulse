@@ -134,6 +134,7 @@ function buildTaperedPath(
 
 const ARROW_SIZE = 5;
 const ARROW_ANGLE = Math.tan(Math.PI / 6);
+const TARGET_MARGIN = 10;
 
 function CausalEdgeComponent({
   source,
@@ -172,8 +173,18 @@ function CausalEdgeComponent({
     const ti = getNodeIntersection(targetNode, sc);
     sourceX = si.x;
     sourceY = si.y;
-    targetX = ti.x;
-    targetY = ti.y;
+    // 화살표를 노드 경계에서 약간 떨어뜨려 시각적 여백 확보
+    // 노드 중심→교차점 방향(면 법선)으로 밀어내야 화살표가 노드 중심을 향함
+    const ndx = ti.x - tc.x;
+    const ndy = ti.y - tc.y;
+    const nLen = Math.sqrt(ndx * ndx + ndy * ndy);
+    if (nLen > 0) {
+      targetX = ti.x + (ndx / nLen) * TARGET_MARGIN;
+      targetY = ti.y + (ndy / nLen) * TARGET_MARGIN;
+    } else {
+      targetX = ti.x;
+      targetY = ti.y;
+    }
     sourcePosition = toPosition(sourceNode, si);
     targetPosition = toPosition(targetNode, ti);
   }
